@@ -10,9 +10,11 @@
 
 # nolint: indentation_linter.
 
+```{r}
 # Limpiamos el entorno
 rm(list = ls())
 gc(verbose = FALSE)
+```
 
 # Librerías necesarias
 # require("data.table")
@@ -20,23 +22,24 @@ require("rpart")
 require("ROCR")
 require("ggplot2")
 
-
+```{r}
 # Poner la carpeta de la materia de SU computadora local
 base = '/home/vbettachini/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/dmeyf2023/meine/'
-# subject = 'datasets/'
+# subject = 'meine/'
 setwd(base)
+
 # Poner sus semillas
 semillas <- c(777787, 274837, 874807, 674831, 974821)
+```
 
-
-# Cargamos el dataset
+## Cargamos el dataset
 ```{r, warning=F, message=F}
 if(!require('data.table')){
     install.packages('data.table')
 }
 library('data.table')
+dataset <- fread("./competencia_01.csv")
 ```
-dataset <- fread("./datasets/competencia_01.csv")
 
 # Nos quedamos solo con el 202101
 dataset <- dataset[foto_mes == 202103]
@@ -53,6 +56,12 @@ dataset[, clase_ternaria := NULL]
 set.seed(semillas[1])
 
 # Particionamos de forma estratificada
+```{r, warning=F, message=F}
+if(!require('caret')){
+    install.packages('caret')
+}
+library('caret')
+```
 in_training <- caret::createDataPartition(dataset$clase_binaria,
                      p = 0.70, list = FALSE) 
 dtrain  <-  dataset[in_training, ]
@@ -113,7 +122,7 @@ resultados_n_gan <- c()
 
 # Calcule en función del tiempo de ejecución anterior, cuantos árboles puede
 # hacer en 5 minutos y ponga ese número en la siguiente variable
-n <- 100
+n <- 1 # tuna
 
 set.seed(semillas[1])
 t0 <- Sys.time()
