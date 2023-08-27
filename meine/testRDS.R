@@ -29,3 +29,8 @@ Datos <- data.frame(INDICE, FECHA, GRUPO)
 saveRDS(object= Datos, file= './datos.rds')
 
 Datos
+
+resultados <- readRDS(file= './resultados_grid_search.rds')
+
+resultados <- setorder(resultados, gan)
+resultados

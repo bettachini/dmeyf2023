@@ -261,8 +261,8 @@ print(mean(resultados_mis_semillas))
 
 resultados_grid_search <- data.table()
 
-# Complete los valores que se van a combinar para cada parámetro a explorar
 
+# Complete los valores que se van a combinar para cada parámetro a explorar
 for (cp in c(-1, 0.01)) { 
 for (md in c(5, 10, 15, 30)) {
 for (ms in c(1, 50, 500, 1000)) {
@@ -314,6 +314,9 @@ saveRDS(object= resultados_grid_search, file= './resultados_grid_search.rds')
 
 # Visualizo los parámetros de los mejores parámetros
 print(resultados_grid_search[gan == max(gan), ])
+
+# Los ordena por ganancia
+resultados_grid_search <- setorder(resultados_grid_search, gan)
 resultados_grid_search
 
 ## TAREA:
