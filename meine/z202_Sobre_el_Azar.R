@@ -16,10 +16,10 @@ rm(list = ls())
 gc(verbose = FALSE)
 
 # Librerías necesarias
-require("data.table")
-require("rpart")
-require("ROCR")
-require("ggplot2")
+# require("data.table")
+# require("rpart")
+# require("ROCR")
+# require("ggplot2")
 
 
 # Poner la carpeta de la materia de SU computadora local
@@ -29,6 +29,10 @@ setwd(base)
 semillas <- c(777787, 274837, 874807, 674831, 974821)
 
 # Cargamos el dataset
+if(!require('data.table')){
+    install.packages('data.table')
+}
+library('data.table')
 dataset <- fread("./competencia_01.csv")
 
 # Nos quedamos solo con el 202101
@@ -46,6 +50,11 @@ dataset[, clase_ternaria := NULL]
 set.seed(semillas[1])
 
 # Particionamos de forma estratificada
+if(!require('caret')){
+    install.packages('caret')
+}
+library('caret')
+
 in_training <- caret::createDataPartition(dataset$clase_binaria,
                      p = 0.70, list = FALSE) 
 dtrain  <-  dataset[in_training, ]
@@ -63,6 +72,11 @@ dtest   <-  dataset[-in_training, ]
 ## ---------------------------
 
 # Medimos cuanto tarda nuestro modelo en ajustar
+if(!require('rpart')){
+    install.packages('rpart')
+}
+library('rpart')
+
 start_time <- Sys.time()
 modelo <- rpart(clase_binaria ~ .,
                 data = dtrain,
@@ -151,6 +165,11 @@ print(max(resultados_n_gan))
 print(mean(resultados_n_gan))
 
 # Veamos la dispersión de la ganancia
+if(!require('ggplot2')){
+    install.packages('ggplot2')
+}
+library('ggplot2')
+
 ggplot() + aes(resultados_n_gan) + geom_density()
 
 ## Preguntas
