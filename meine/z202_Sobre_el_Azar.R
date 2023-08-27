@@ -308,11 +308,13 @@ for (mb in c(1, as.integer(ms / 2))) {
 }
 }
 
-# Visualizo los parámetros de los mejores parámetros
-print(resultados_grid_search[gan == max(gan), ])
 
 # Graba un archivo
-save(resultados_grid_search, 'resultados_grid_search.Rdata')
+saveRDS(object= resultados_grid_search, file= './resultados_grid_search.rds')
+
+# Visualizo los parámetros de los mejores parámetros
+print(resultados_grid_search[gan == max(gan), ])
+resultados_grid_search
 
 ## TAREA:
 ## Una vez que tenga sus mejores parámetros, haga una copia del script
