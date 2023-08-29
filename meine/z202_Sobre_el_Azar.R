@@ -23,26 +23,26 @@ gc(verbose = FALSE)
 
 
 # Poner la carpeta de la materia de SU computadora local
-base = '/home/vbettachini/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/dmeyf2023/meine/'
+base <- "/home/vbettachini/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/dmeyf2023/meine/"
 setwd(base)
 # Poner sus semillas
 semillas <- c(777787, 274837, 874807, 674831, 974821)
 
 # Cargamos el dataset
-if(!require('data.table')){
-    install.packages('data.table')
+if (!require("data.table")){
+    install.packages("data.table")
 }
-library('data.table')
+library("data.table")
 dataset <- fread("./competencia_01.csv")
 
 # Nos quedamos solo con el 202101
 dataset <- dataset[foto_mes == 202103]
 # Creamos una clase binaria
 dataset[, clase_binaria := ifelse(
-                            clase_ternaria == "BAJA+2",
-                                "evento",
-                                "noevento"
-                            )]
+    clase_ternaria == "BAJA+2",
+    "evento",
+    "noevento"
+    )]
 # Borramos el target viejo
 dataset[, clase_ternaria := NULL]
 
