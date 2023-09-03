@@ -13,7 +13,7 @@ rm(list = ls())
 gc(verbose = FALSE)
 
 # Bibliotecas necesarias
-require("data.table")
+# require("data.table")
 require("rpart")
 
 if (!require("ROCR")) {
@@ -50,6 +50,10 @@ setwd(base)
 semillas <- c(777787, 274837, 874807, 674831, 974821)
 
 # Cargamos el dataset
+if(!require('data.table')){
+    install.packages('data.table')
+}
+library('data.table')
 dataset <- fread("./competencia_01.csv")
 
 # Nos quedamos solo con el 202101
