@@ -25,10 +25,13 @@ gc(verbose = FALSE)
 # require("rgenoud")
 
 if (!require("ggplot2")) {
-  install.packages("ggplot2")
-#   install.packages("ggplot2", dependencies=TRUE) # dependencies didn't solved caret conflict
+  #install.packages("ggplot2")
+  install.packages("ggplot2", dependencies=TRUE)
+  # needed previous
+  # - install.package("lazyeval"
+  # - sudo apt install libudunits2-dev as stated in [configuration failed for package ‘units’](https://community.rstudio.com/t/configuration-failed-for-package-units/76417)
 }
-require("ggplot")
+require("ggplot2")
 
 
 
