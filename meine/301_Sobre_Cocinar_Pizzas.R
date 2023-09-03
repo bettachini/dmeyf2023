@@ -2,7 +2,7 @@
 ## Sobre como cocinar Pizzas
 ##
 ## ---------------------------
-## Step 1: Cargando los datos y las librerías
+## Step 1: Cargando los datos y las bibliotecas
 ## ---------------------------
 ##
 ## Success is a lousy teacher. It seduces smart people into thinking they can't  lose.
@@ -12,29 +12,16 @@
 rm(list = ls())
 gc(verbose = FALSE)
 
+
 # Bibliotecas necesarias
-# require("data.table")
-require("rpart")
-
-if (!require("ROCR")) {
-  install.packages("ROCR")
-}
-require("ROCR")
-
-require("ggplot2")
-require("lubridate")
-require("lhs")
-
-if (!require("DiceKriging")) {
-  install.packages("DiceKriging")
-}
-require("DiceKriging")
-
-if (!require("mlrMBO")) {
-  install.packages("mlrMBO")
-}
-require("mlrMBO")
-
+#require("data.table")
+#require("rpart")
+#require("ROCR")
+#require("ggplot2")
+#require("lubridate")
+#require("lhs")
+#require("DiceKriging")
+#require("mlrMBO")
 if (!require("rgenoud")) {
   install.packages("rgenoud")
 }
@@ -50,10 +37,10 @@ setwd(base)
 semillas <- c(777787, 274837, 874807, 674831, 974821)
 
 # Cargamos el dataset
-if(!require('data.table')){
-    install.packages('data.table')
+if (!require("data.table")) {
+  install.packages("data.table")
 }
-library('data.table')
+library("data.table")
 dataset <- fread("./competencia_01.csv")
 
 # Nos quedamos solo con el 202101
@@ -85,15 +72,21 @@ dtest   <-  dataset[-in_training, ]
 ## Step 2: Nuestra pizza: Un modelo
 ## ---------------------------
 
+if(!require("rpart")){
+  install.packages("rpart")
+}
+library("rpart")
+
 # Calculamos cuanto tarda un modelo "promedio" entrenar.
 start_time <- Sys.time()
 modelo <- rpart(clase_binaria ~ .,
-                data = dtrain,
-                xval = 0,
-                cp = 0,
-                minsplit = 20,
-                minbucket = 10,
-                maxdepth = 10)
+  data = dtrain,
+  xval = 0,
+  cp = 0,
+  minsplit = 20,
+  minbucket = 10,
+  maxdepth = 10
+)
 pred_testing <- predict(modelo, dtest, type = "prob")
 end_time <- Sys.time()
 model_time <- end_time - start_time
@@ -103,7 +96,7 @@ print(model_time)
 ganancia <- function(probabilidades, clase) {
   return(sum(
     (probabilidades >= 0.025) * ifelse(clase == "evento", 273000, -7000)
-  )
+    )
   )
 }
 
@@ -112,10 +105,21 @@ print(ganancia(pred_testing[, "evento"], dtest$clase_binaria) / 0.3)
 
 ## Preguntas
 ## - ¿Es acaso este el mejor modelo posible?
+# No, pues no se ha buscado el mejor modelo posible.
+
 ## - ¿Dónde lo buscamos el mejor modelo?
+#  En el espacio de búsqueda.
+
 ## - ¿Qué parámetros conoce para un árbol de decisión?
+# profundidad (maxdepth, mindepth), minsplit, minbucket, cp, etc.
+
 ## - ¿Qué espacios de búsqueda tienen los parámetros *maxdepth* y *minsplit*?
+# maxdepth: 4 a 30
+
 ## - ¿Cómo se imagina la interacción entre esto dos últimos parámetros?
+# A mayor maxdepth, mayor minsplit.
+
+
 
 ## ---------------------------
 ## Step 3: There Ain't No Such Thing As A Free Lunch
@@ -132,6 +136,10 @@ n_ms <- 200 - 2
 n_seeds <- 5
 
 # Estimación de cuanto tardaría en buscar el mejor modelo con 2 parámetros.
+if (!require("lubridate")) {
+  install.packages("lubridate")
+}
+require("lubridate")
 print(seconds_to_period(n_md * n_ms * n_seeds * model_time))
 
 # Tamaño del espacio de búsqueda de *minbucket*
@@ -142,8 +150,11 @@ print(seconds_to_period(n_md * n_ms * n_seeds * model_time * n_mb))
 
 ## Preguntas
 ## - ¿Dispone del tiempo para realizar esta búsqueda?
-## - ¿Qué hacemos cuándo un parámetro tiene valores continuos?
+# Evidentemente no, ni 4 días ni mucho menos 445 si se toma en cuenta n_mb, el tamaño del ninbucket.
+# Por eso se usan técnicas de optimización bayesiana.
 
+## - ¿Qué hacemos cuándo un parámetro tiene valores continuos?
+# Se discretiza el espacio de búsqueda.
 
 ## ---------------------------
 ## Step 4: Empezando a probar con menos casos
@@ -153,6 +164,11 @@ set.seed(semillas[1])
 dist_uni <- matrix(runif(20), 10, 2)
 
 # LHS Latin hypercube sampling
+if (!require("lhs")) {
+  install.packages("lhs")
+}
+require("lhs")
+
 set.seed(semillas[1])
 dist_lhs <- optimumLHS(10, 2)
 
@@ -163,6 +179,10 @@ plot(dist_lhs)
 
 ## Preguntas
 ## - ¿Cuál distribución considera mejor? Justifique
+# La "latin hypercube sampling" pues cubre mejor el espacio de búsqueda.
+# En la uniforme pparecen concentrarse los casos para en la coordenada 2 < 0.5.
+# Cito ["...so the points are as spread out as possible."](https://www.rdocumentation.org/packages/lhs/versions/1.1.6/topics/optimumLHS)
+# alt (https://search.r-project.org/CRAN/refmans/lhs/html/optimumLHS.html)
 
 
 ## ---------------------------
@@ -170,6 +190,11 @@ plot(dist_lhs)
 ## ---------------------------
 
 # Armamos una función para modelar con el fin de simplificar el código futuro
+if (!require("ROCR")) {
+  install.packages("ROCR")
+}
+require("ROCR")
+
 modelo_rpart <- function(train, test, cp =  0, ms = 20, mb = 1, md = 10) {
   modelo <- rpart(clase_binaria ~ ., data = train,
     xval = 0,
@@ -203,6 +228,7 @@ table(dataset[ds_sample]$clase_binaria)
 
 ## Preguntas
 ## - ¿Qué tipo de muestreo se tomó?
+# ?
 
 ## - ¿Hay mejores formas de muestrear?
 ##Tratar de preservar la clase más valiosa y descartar el resto.
@@ -219,6 +245,7 @@ table(dataset[ds_sample]$clase_binaria)
 ## Todas las proporciones se verán afectadas, por eso se eligo área bajo la curva que no lo será.
 
 ## - ¿Qué hay que cambiar en la función de ganancia para poder utilizarla?
+# ?
 
 
 ## ---------------------------
@@ -244,6 +271,7 @@ print(r2)
 
 ## Preguntas
 ## - ¿Por qué sólo se muestrea train?
+# Obviamente porque es donde se entrena, pero sospecho algo sobre contaminación si lo hago sobre test.
 
 
 ## ---------------------------
@@ -298,20 +326,39 @@ for (e in 1:cantidad_puntos) {
 }
 
 print(resultados_random_search)
-ggplot(resultados_random_search, aes(x = md, y = ms, color = auc)) +
-  scale_color_gradient(low = "blue", high = "red") +
-  geom_point(aes(size = auc)
-  )
+saveRDS(object = resultados_random_search,
+  file = './301_resultados_random_search.rds'
+)
+
+if (!require("ggplot2")) {
+  install.packages("ggplot2")
+#   install.packages("ggplot2", dependencies=TRUE) # dependencies didn't solved caret conflict
+}
+require("ggplot")
+ggplot2::ggplot(resultados_random_search,
+  ggplot2::aes(x = md, y = ms, color = auc)
+  ) +
+ggplot2::scale_color_gradient(low = "blue", high = "red") +
+ggplot2::geom_point(ggplot2::aes(size = auc))
 
 
 ## Preguntas
 ## - ¿Hay alguna zona dónde parece que hay más ganancia?
+# Por la escala cromática del area bajo la curva (AUC) evitar:
+# - (minsplits, ms) < 25
+# - profundidadems mínimas (mindepth, md) < 10.
+
 ## - ¿Cómo podemos continuar nuestra búsqueda?
+# ?
 
 
 ## ---------------------------
 ## Step 8: Trabajando con herramientas más profesionales
 ## ---------------------------
+if (!require("mlrMBO")) {
+  install.packages("mlrMBO")
+}
+require("mlrMBO")
 
 # Veamos un ejemplo
 set.seed(semillas[1])
@@ -327,6 +374,10 @@ ctrl <- setMBOControlInfill(ctrl, crit = makeMBOInfillCritEI(),
   opt = "focussearch"
 )
 
+if (!require("DiceKriging")) {
+  install.packages("DiceKriging")
+}
+require("DiceKriging")
 lrn <- makeMBOLearner(ctrl, obj_fun)
 design <- generateDesign(6L, getParamSet(obj_fun), fun = lhs::maximinLHS)
 
