@@ -78,7 +78,7 @@ dtest   <-  dataset[-in_training, ]
 ## Step 2: Nuestra pizza: Un modelo
 ## ---------------------------
 
-if(!require("rpart")){
+if (!require("rpart")) {
   install.packages("rpart")
 }
 library("rpart")
@@ -102,7 +102,7 @@ print(model_time)
 ganancia <- function(probabilidades, clase) {
   return(sum(
     (probabilidades >= 0.025) * ifelse(clase == "evento", 273000, -7000)
-    )
+  )
   )
 }
 
@@ -333,19 +333,18 @@ for (e in 1:cantidad_puntos) {
 
 print(resultados_random_search)
 saveRDS(object = resultados_random_search,
-  file = './301_resultados_random_search.rds'
+  file = "./301_resultados_random_search.rds"
 )
 
 if (!require("ggplot2")) {
   install.packages("ggplot2")
-#   install.packages("ggplot2", dependencies=TRUE) # dependencies didn't solved caret conflict
 }
 require("ggplot2")
 ggplot2::ggplot(resultados_random_search,
   ggplot2::aes(x = md, y = ms, color = auc)
-  ) +
-ggplot2::scale_color_gradient(low = "blue", high = "red") +
-ggplot2::geom_point(ggplot2::aes(size = auc))
+) +
+  ggplot2::scale_color_gradient(low = "blue", high = "red") +
+  ggplot2::geom_point(ggplot2::aes(size = auc))
 
 
 ## Preguntas
@@ -423,7 +422,7 @@ for (v in 4:20) {
 }
 
 saveRDS(object = resultados_maxdepth,
-  file = './301_resultados_maxdepth.rds'
+  file = "./301_resultados_maxdepth.rds"
 )
 
 ggplot(resultados_maxdepth, aes(md, auc)) + geom_point()
@@ -464,7 +463,7 @@ run_md <- mbo(obj_fun, learner = surr_km, control = ctrl)
 print(run_md)
 
 saveRDS(object = run_md,
-  file = './301_run_md.rds'
+  file = "./301_run_md.rds"
 )
 
 ## ---------------------------
@@ -510,7 +509,7 @@ run_md_ms <- mbo(obj_fun, learner = surr_km, control = ctrl, )
 print(run_md_ms)
 
 saveRDS(object = run_md_ms,
-  file = './301_run_md_ms.rds'
+  file = "./301_run_md_ms.rds"
 )
 
 ## Visualizamos
@@ -518,5 +517,5 @@ iter <- as.data.frame(run_md_ms$opt.path)
 ggplot(iter, aes(y = minsplit, x = maxdepth, color = prop.type)) + geom_point(aes(size = y))
 
 saveRDS(object = iter,
-  file = './301_iter.rds'
+  file = "./301_iter.rds"
 )
