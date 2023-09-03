@@ -310,7 +310,7 @@ for (mb in c(1, as.integer(ms / 2))) {
 
 
 # Graba un archivo
-saveRDS(object= resultados_grid_search, file= './resultados_grid_search.rds')
+saveRDS(object= resultados_grid_search, file= './201_resultados_grid_search.rds')
 
 # Visualizo los parámetros de los mejores parámetros
 print(resultados_grid_search[gan == max(gan), ])

@@ -24,14 +24,14 @@ gc(verbose = FALSE)
 #require("mlrMBO")
 # require("rgenoud")
 
-if (!require("ggplot2")) {
-  #install.packages("ggplot2")
-  install.packages("ggplot2", dependencies=TRUE)
-  # needed previous
-  # - install.package("lazyeval"
-  # - sudo apt install libudunits2-dev as stated in [configuration failed for package ‘units’](https://community.rstudio.com/t/configuration-failed-for-package-units/76417)
-}
-require("ggplot2")
+#if (!require("ggplot2")) {
+#  #install.packages("ggplot2")
+#  install.packages("ggplot2", dependencies=TRUE)
+#  # needed previous
+#  # - install.package("lazyeval"
+#  # - sudo apt install libudunits2-dev as stated in [configuration failed for package ‘units’](https://community.rstudio.com/t/configuration-failed-for-package-units/76417)
+#}
+#require("ggplot2")
 
 
 
@@ -312,7 +312,7 @@ set.seed(semillas[1])
 cantidad_puntos <- 25
 espacio_busqueda_1 <- optimumLHS(cantidad_puntos, 2)
 
-# la primera columna es para el maxdepth, y la segunda para el minslip
+# la primera columna es para el maxdepth, y la segunda para el minsplit
 espacio_busqueda_1[, 1] <- floor(15 * espacio_busqueda_1[, 1]) + 4
 espacio_busqueda_1[, 2] <- floor(200 * espacio_busqueda_1[, 2]) + 2
 
@@ -340,7 +340,7 @@ if (!require("ggplot2")) {
   install.packages("ggplot2")
 #   install.packages("ggplot2", dependencies=TRUE) # dependencies didn't solved caret conflict
 }
-require("ggplot")
+require("ggplot2")
 ggplot2::ggplot(resultados_random_search,
   ggplot2::aes(x = md, y = ms, color = auc)
   ) +
@@ -351,11 +351,12 @@ ggplot2::geom_point(ggplot2::aes(size = auc))
 ## Preguntas
 ## - ¿Hay alguna zona dónde parece que hay más ganancia?
 # Por la escala cromática del area bajo la curva (AUC) evitar:
-# - (minsplits, ms) < 25
-# - profundidadems mínimas (mindepth, md) < 10.
+# - mínimo de observaciones por nodo o rama (minsplits, ms) < 25
+# - profundidad máxima del árbol (maxdepth, md) < 10
+# - mínimo de observaciones por nodo terminal u hoja (minbucket, mb)
 
 ## - ¿Cómo podemos continuar nuestra búsqueda?
-# ?
+# Restan el otro hiperparámetro: minbucket (mb)
 
 
 ## ---------------------------
@@ -421,6 +422,10 @@ for (v in 4:20) {
   resultados_maxdepth <- rbindlist(list(resultados_maxdepth, r))
 }
 
+saveRDS(object = resultados_maxdepth,
+  file = './301_resultados_maxdepth.rds'
+)
+
 ggplot(resultados_maxdepth, aes(md, auc)) + geom_point()
 
 ## ---------------------------
@@ -458,6 +463,9 @@ surr_km <- makeLearner("regr.km", predict.type = "se", covtype = "matern3_2")
 run_md <- mbo(obj_fun, learner = surr_km, control = ctrl)
 print(run_md)
 
+saveRDS(object = run_md,
+  file = './301_run_md.rds'
+)
 
 ## ---------------------------
 ## Step 10: Buscando con una Opt. Bayesiana para 2 parámetros
@@ -501,6 +509,14 @@ surr_km <- makeLearner("regr.km", predict.type = "se", covtype = "matern3_2")
 run_md_ms <- mbo(obj_fun, learner = surr_km, control = ctrl, )
 print(run_md_ms)
 
+saveRDS(object = run_md_ms,
+  file = './301_run_md_ms.rds'
+)
+
 ## Visualizamos
 iter <- as.data.frame(run_md_ms$opt.path)
 ggplot(iter, aes(y = minsplit, x = maxdepth, color = prop.type)) + geom_point(aes(size = y))
+
+saveRDS(object = iter,
+  file = './301_iter.rds'
+)
