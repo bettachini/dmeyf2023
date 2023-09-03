@@ -13,7 +13,7 @@ rm(list = ls())
 gc(verbose = FALSE)
 
 
-# Bibliotecas necesarias
+# Bibliotecas necesarias -> les cargo donde se necesiten
 #require("data.table")
 #require("rpart")
 #require("ROCR")
@@ -22,10 +22,13 @@ gc(verbose = FALSE)
 #require("lhs")
 #require("DiceKriging")
 #require("mlrMBO")
-if (!require("rgenoud")) {
-  install.packages("rgenoud")
+# require("rgenoud")
+
+if (!require("ggplot2")) {
+  install.packages("ggplot2")
+#   install.packages("ggplot2", dependencies=TRUE) # dependencies didn't solved caret conflict
 }
-require("rgenoud")
+require("ggplot")
 
 
 
@@ -381,6 +384,10 @@ require("DiceKriging")
 lrn <- makeMBOLearner(ctrl, obj_fun)
 design <- generateDesign(6L, getParamSet(obj_fun), fun = lhs::maximinLHS)
 
+if (!require("rgenoud")) {
+  install.packages("rgenoud")
+}
+require("rgenoud")
 run <- exampleRun(obj_fun, design = design, learner = lrn,
   control = ctrl, points.per.dim = 100, show.info = TRUE
 )
