@@ -1,0 +1,2514 @@
+
+R version 4.2.2 Patched (2022-11-10 r83330) -- "Innocent and Trusting"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ##
+> ## Sobre como cocinar Pizzas
+> ##
+> ## ---------------------------
+> ## Step 1: Cargando los datos y las bibliotecas
+> ## ---------------------------
+> ##
+> ## Success is a lousy teacher. It seduces smart people into thinking they can't  lose.
+> ## --- Bill Gates
+> 
+> # Limpiamos el entorno
+> rm(list = ls())
+> gc(verbose = FALSE)
+         used (Mb) gc trigger (Mb) max used (Mb)
+Ncells 273777 14.7     661174 35.4   452247 24.2
+Vcells 459277  3.6    8388608 64.0  1801102 13.8
+> 
+> 
+> # Bibliotecas necesarias -> les cargo donde se necesiten
+> #require("data.table")
+> #require("rpart")
+> #require("ROCR")
+> #require("ggplot2")
+> #require("lubridate")
+> #require("lhs")
+> #require("DiceKriging")
+> #require("mlrMBO")
+> # require("rgenoud")
+> 
+> #if (!require("ggplot2")) {
+> #  #install.packages("ggplot2")
+> #  install.packages("ggplot2", dependencies=TRUE)
+> #  # needed previous
+> #  # - install.package("lazyeval"
+> #  # - sudo apt install libudunits2-dev as stated in [configuration failed for package ‘units’](https://community.rstudio.com/t/configuration-failed-for-package-units/76417)
+> #}
+> #require("ggplot2")
+> 
+> 
+> 
+> # Poner la carpeta de la materia de SU computadora local
+> base <- "/home/vbettachini/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/dmeyf2023/meine/"
+> setwd(base)
+> 
+> # Poner sus semillas
+> semillas <- c(777787, 274837, 874807, 674831, 974821)
+> 
+> # Cargamos el dataset
+> if (!require("data.table")) {
++   install.packages("data.table")
++ }
+Loading required package: data.table
+> library("data.table")
+> dataset <- fread("./competencia_01.csv")
+> 
+> # Nos quedamos solo con el 202101
+> dataset <- dataset[foto_mes == 202103]
+> # Creamos una clase binaria
+> dataset[, clase_binaria := ifelse(
++   clase_ternaria == "BAJA+2",
++   "evento",
++   "noevento"
++ )]
+> 
+> # Borramos el target viejo
+> dataset[, clase_ternaria := NULL]
+> 
+> # Seteamos nuestra primera semilla
+> set.seed(semillas[1])
+> 
+> # Particionamos de forma estratificada
+> in_training <- caret::createDataPartition(
++   dataset$clase_binaria,
++   p = 0.70,
++   list = FALSE
++ )
+> dtrain  <-  dataset[in_training, ]
+> dtest   <-  dataset[-in_training, ]
+> 
+> 
+> ## ---------------------------
+> ## Step 2: Nuestra pizza: Un modelo
+> ## ---------------------------
+> 
+> if (!require("rpart")) {
++   install.packages("rpart")
++ }
+Loading required package: rpart
+> library("rpart")
+> 
+> # Calculamos cuanto tarda un modelo "promedio" entrenar.
+> start_time <- Sys.time()
+> modelo <- rpart(clase_binaria ~ .,
++   data = dtrain,
++   xval = 0,
++   cp = 0,
++   minsplit = 20,
++   minbucket = 10,
++   maxdepth = 10
++ )
+> pred_testing <- predict(modelo, dtest, type = "prob")
+> end_time <- Sys.time()
+> model_time <- end_time - start_time
+> print("Tiempo de ajuste en train y predict en test")
+[1] "Tiempo de ajuste en train y predict en test"
+> print(model_time)
+Time difference of 14.9054 secs
+> 
+> ganancia <- function(probabilidades, clase) {
++   return(sum(
++     (probabilidades >= 0.025) * ifelse(clase == "evento", 273000, -7000)
++   )
++   )
++ }
+> 
+> print("La ganancia NORMALIZADA de nuestro modelo es:")
+[1] "La ganancia NORMALIZADA de nuestro modelo es:"
+> print(ganancia(pred_testing[, "evento"], dtest$clase_binaria) / 0.3)
+[1] 51986667
+> 
+> ## Preguntas
+> ## - ¿Es acaso este el mejor modelo posible?
+> # No, pues no se ha buscado el mejor modelo posible.
+> 
+> ## - ¿Dónde lo buscamos el mejor modelo?
+> #  En el espacio de búsqueda.
+> 
+> ## - ¿Qué parámetros conoce para un árbol de decisión?
+> # profundidad (maxdepth, mindepth), minsplit, minbucket, cp, etc.
+> 
+> ## - ¿Qué espacios de búsqueda tienen los parámetros *maxdepth* y *minsplit*?
+> # maxdepth: 4 a 30
+> 
+> ## - ¿Cómo se imagina la interacción entre esto dos últimos parámetros?
+> # A mayor maxdepth, mayor minsplit.
+> 
+> 
+> 
+> ## ---------------------------
+> ## Step 3: There Ain't No Such Thing As A Free Lunch
+> ## ---------------------------
+> 
+> # Supongamos que sólo vamos a buscar sobre los parámetros *maxdepth* y
+> # *minsplit*
+> 
+> # Tamaño del espacio de búsqueda de *maxdepth*
+> n_md <- 30 - 4
+> # Tamaño del espacio de búsqueda de *minsplit*
+> n_ms <- 200 - 2
+> # Cantidad de semillas
+> n_seeds <- 5
+> 
+> # Estimación de cuanto tardaría en buscar el mejor modelo con 2 parámetros.
+> if (!require("lubridate")) {
++   install.packages("lubridate")
++ }
+Loading required package: lubridate
+
+Attaching package: ‘lubridate’
+
+The following objects are masked from ‘package:data.table’:
+
+    hour, isoweek, mday, minute, month, quarter, second, wday, week,
+    yday, year
+
+The following objects are masked from ‘package:base’:
+
+    date, intersect, setdiff, union
+
+> require("lubridate")
+> print(seconds_to_period(n_md * n_ms * n_seeds * model_time))
+[1] "4d 10H 34M 24.8865079879761S"
+> 
+> # Tamaño del espacio de búsqueda de *minbucket*
+> n_mb <- 100 - 2
+> 
+> # Estimación de cuanto tardaría en buscar el mejor modelo con 3 parámetros.
+> print(seconds_to_period(n_md * n_ms * n_seeds * model_time * n_mb))
+[1] "435d 4H 12M 38.8777828216553S"
+> 
+> ## Preguntas
+> ## - ¿Dispone del tiempo para realizar esta búsqueda?
+> # Evidentemente no, ni 4 días ni mucho menos 445 si se toma en cuenta n_mb, el tamaño del ninbucket.
+> # Por eso se usan técnicas de optimización bayesiana.
+> 
+> ## - ¿Qué hacemos cuándo un parámetro tiene valores continuos?
+> # Se discretiza el espacio de búsqueda.
+> 
+> ## ---------------------------
+> ## Step 4: Empezando a probar con menos casos
+> ## ---------------------------
+> 
+> set.seed(semillas[1])
+> dist_uni <- matrix(runif(20), 10, 2)
+> 
+> # LHS Latin hypercube sampling
+> if (!require("lhs")) {
++   install.packages("lhs")
++ }
+Loading required package: lhs
+> require("lhs")
+> 
+> set.seed(semillas[1])
+> dist_lhs <- optimumLHS(10, 2)
+> 
+> par(mfrow = c(1, 2))
+> plot(dist_uni)
+> plot(dist_lhs)
+> 
+> 
+> ## Preguntas
+> ## - ¿Cuál distribución considera mejor? Justifique
+> # La "latin hypercube sampling" pues cubre mejor el espacio de búsqueda.
+> # En la uniforme pparecen concentrarse los casos para en la coordenada 2 < 0.5.
+> # Cito ["...so the points are as spread out as possible."](https://www.rdocumentation.org/packages/lhs/versions/1.1.6/topics/optimumLHS)
+> # alt (https://search.r-project.org/CRAN/refmans/lhs/html/optimumLHS.html)
+> 
+> 
+> ## ---------------------------
+> ## Step 5: Tomando una muestra de sangre
+> ## ---------------------------
+> 
+> # Armamos una función para modelar con el fin de simplificar el código futuro
+> if (!require("ROCR")) {
++   install.packages("ROCR")
++ }
+Loading required package: ROCR
+> require("ROCR")
+> 
+> modelo_rpart <- function(train, test, cp =  0, ms = 20, mb = 1, md = 10) {
++   modelo <- rpart(clase_binaria ~ ., data = train,
++     xval = 0,
++     cp = cp,
++     minsplit = ms,
++     minbucket = mb,
++     maxdepth = md
++   )
++ 
++   test_prediccion <- predict(modelo, test, type = "prob")
++   roc_pred <-  ROCR::prediction(test_prediccion[, "evento"],
++     test$clase_binaria,
++     label.ordering = c("noevento", "evento")
++   )
++   auc_t <-  ROCR::performance(roc_pred, "auc")
++ 
++   unlist(auc_t@y.values)
++ }
+> 
+> # Función para tomar un muestra dejando todos los elementos de la clase BAJA+2
+> tomar_muestra <- function(datos, resto = 10000) {
++   t <- datos$clase_binaria == "evento"
++   r <- rep(FALSE, length(datos$clase_binaria))
++   r[!t][sample.int(resto, n = (length(t) - sum(t)))] <- TRUE
++   t | r
++ }
+> 
+> set.seed(semillas[1])
+> ds_sample <- tomar_muestra(dataset)
+> table(dataset[ds_sample]$clase_binaria)
+
+  evento noevento 
+     963    10000 
+> 
+> ## Preguntas
+> ## - ¿Qué tipo de muestreo se tomó?
+> # ?
+> 
+> ## - ¿Hay mejores formas de muestrear?
+> ##Tratar de preservar la clase más valiosa y descartar el resto.
+> 
+> ## - ¿Es bueno muestrear?
+> ##No. Pero no me queda otra, por falta de tiempo.
+> ##Jamás se hace muestreo de los conjuntos de validación o prueba (test).
+> 
+> ## - ¿Qué efectos en las métricas va a producir el muestreo?
+> ## Nada, pues una vez establecido el árbol, los limitantes
+> ## (min bucket size) eran aplicados al entrenar (generar el árbol)
+> 
+> ## - ¿Por qué se eligió usar el AUC?
+> ## Todas las proporciones se verán afectadas, por eso se eligo área bajo la curva que no lo será.
+> 
+> ## - ¿Qué hay que cambiar en la función de ganancia para poder utilizarla?
+> # ?
+> 
+> 
+> ## ---------------------------
+> ## Step 6: Comparando tiempos con o sin muestras
+> ## ---------------------------
+> 
+> t0 <- Sys.time()
+> r1 <- modelo_rpart(dtrain, dtest)
+> t1 <- Sys.time()
+> print("Train entero")
+[1] "Train entero"
+> print(t1 - t0)
+Time difference of 14.36211 secs
+> print(r1)
+[1] 0.8806348
+> 
+> set.seed(semillas[1])
+> dtrain_sample <- tomar_muestra(dtrain)
+> 
+> t0 <- Sys.time()
+> r2 <- modelo_rpart(dtrain[dtrain_sample, ], dtest)
+> t1 <- Sys.time()
+> print("Muestra train")
+[1] "Muestra train"
+> print(t1 - t0)
+Time difference of 1.173567 secs
+> print(r2)
+[1] 0.8368699
+> 
+> ## Preguntas
+> ## - ¿Por qué sólo se muestrea train?
+> # Obviamente porque es donde se entrena, pero sospecho algo sobre contaminación si lo hago sobre test.
+> 
+> 
+> ## ---------------------------
+> ## Step 7: Buscando el mejor modelo con muestras aleatorias LHS
+> ## ---------------------------
+> 
+> # Una función auxiliar para los experimentos
+> experimento_rpart <- function(ds, semillas, cp = 0, ms = 20, mb = 1, md = 10) {
++   auc <- c()
++   for (s in semillas) {
++     set.seed(s)
++     in_training <- caret::createDataPartition(
++       ds$clase_binaria,
++       p = 0.70,
++       list = FALSE
++     )
++     train  <-  ds[in_training, ]
++     test   <-  ds[-in_training, ]
++     train_sample <- tomar_muestra(train)
++     r <- modelo_rpart(train[train_sample, ], test,
++       cp = cp, ms = ms, mb = mb, md = md
++     )
++     auc <- c(auc, r)
++   }
++   mean(auc)
++ }
+> 
+> # Haremos 25 experimentos aleatorios, armamos las muestras de acuerdo a como
+> # son las entradas de nuestro experimento.
+> 
+> set.seed(semillas[1])
+> cantidad_puntos <- 25
+> espacio_busqueda_1 <- optimumLHS(cantidad_puntos, 2)
+> 
+> # la primera columna es para el maxdepth, y la segunda para el minsplit
+> espacio_busqueda_1[, 1] <- floor(15 * espacio_busqueda_1[, 1]) + 4
+> espacio_busqueda_1[, 2] <- floor(200 * espacio_busqueda_1[, 2]) + 2
+> 
+> resultados_random_search <- data.table()
+> for (e in 1:cantidad_puntos) {
++   r <- experimento_rpart(dataset, semillas,
++     ms = espacio_busqueda_1[e, 2],
++     md = espacio_busqueda_1[e, 1]
++   )
++   resultados_random_search <- rbindlist(list(resultados_random_search,
++     data.table(
++       md = espacio_busqueda_1[e, 1],
++       ms = espacio_busqueda_1[e, 2],
++       auc = r
++     )
++   ))
++ }
+> 
+> print(resultados_random_search)
+    md  ms       auc
+ 1: 10 129 0.8699369
+ 2: 12  65 0.8492151
+ 3: 18  46 0.8338103
+ 4: 15  50 0.8347273
+ 5:  4 110 0.8459078
+ 6: 17  97 0.8586713
+ 7: 12  10 0.7516847
+ 8: 16 189 0.8739323
+ 9:  7 116 0.8698802
+10:  6 150 0.8671364
+11: 11 181 0.8721032
+12: 10  87 0.8678325
+13: 14 135 0.8652039
+14: 14 101 0.8618677
+15: 14 166 0.8707380
+16:  9  30 0.8501275
+17:  8 159 0.8738539
+18:  5  40 0.8515180
+19:  8   4 0.8301725
+20:  8  74 0.8663090
+21:  4  66 0.8457551
+22: 18 141 0.8653900
+23: 13 199 0.8704424
+24: 16  24 0.8008175
+25:  5 175 0.8484048
+    md  ms       auc
+> saveRDS(object = resultados_random_search,
++   file = "./301_resultados_random_search.rds"
++ )
+> 
+> if (!require("ggplot2")) {
++   install.packages("ggplot2")
++ }
+Loading required package: ggplot2
+> require("ggplot2")
+> ggplot2::ggplot(resultados_random_search,
++   ggplot2::aes(x = md, y = ms, color = auc)
++ ) +
++   ggplot2::scale_color_gradient(low = "blue", high = "red") +
++   ggplot2::geom_point(ggplot2::aes(size = auc))
+> 
+> 
+> ## Preguntas
+> ## - ¿Hay alguna zona dónde parece que hay más ganancia?
+> # Por la escala cromática del area bajo la curva (AUC) evitar:
+> # - mínimo de observaciones por nodo o rama (minsplits, ms) < 25
+> # - profundidad máxima del árbol (maxdepth, md) < 10
+> # - mínimo de observaciones por nodo terminal u hoja (minbucket, mb)
+> 
+> ## - ¿Cómo podemos continuar nuestra búsqueda?
+> # Restan el otro hiperparámetro: minbucket (mb)
+> 
+> 
+> ## ---------------------------
+> ## Step 8: Trabajando con herramientas más profesionales
+> ## ---------------------------
+> if (!require("mlrMBO")) {
++   install.packages("mlrMBO")
++ }
+Loading required package: mlrMBO
+Loading required package: mlr
+Loading required package: ParamHelpers
+Warning message: 'mlr' is in 'maintenance-only' mode since July 2019.
+Future development will only happen in 'mlr3'
+(<https://mlr3.mlr-org.com>). Due to the focus on 'mlr3' there might be
+uncaught bugs meanwhile in {mlr} - please consider switching.
+
+Attaching package: ‘mlr’
+
+The following object is masked from ‘package:ROCR’:
+
+    performance
+
+Loading required package: smoof
+Loading required package: checkmate
+> require("mlrMBO")
+> 
+> # Veamos un ejemplo
+> set.seed(semillas[1])
+> obj_fun <- makeSingleObjectiveFunction(
++   name = "Sine",
++   fn = function(x) sin(x),
++   par.set = makeNumericParamSet(lower = 3, upper = 13, len = 1)
++ )
+> 
+> ctrl <- makeMBOControl()
+> ctrl <- setMBOControlTermination(ctrl, iters = 10L)
+> ctrl <- setMBOControlInfill(ctrl, crit = makeMBOInfillCritEI(),
++   opt = "focussearch"
++ )
+> 
+> if (!require("DiceKriging")) {
++   install.packages("DiceKriging")
++ }
+Loading required package: DiceKriging
+
+Attaching package: ‘DiceKriging’
+
+The following object is masked from ‘package:checkmate’:
+
+    checkNames
+
+> require("DiceKriging")
+> lrn <- makeMBOLearner(ctrl, obj_fun)
+> design <- generateDesign(6L, getParamSet(obj_fun), fun = lhs::maximinLHS)
+> 
+> if (!require("rgenoud")) {
++   install.packages("rgenoud")
++ }
+Loading required package: rgenoud
+##  rgenoud (Version 5.9-0.3, Build Date: 2022-04-19)
+##  See http://sekhon.berkeley.edu/rgenoud for additional documentation.
+##  Please cite software as:
+##   Walter Mebane, Jr. and Jasjeet S. Sekhon. 2011.
+##   ``Genetic Optimization Using Derivatives: The rgenoud package for R.''
+##   Journal of Statistical Software, 42(11): 1-26. 
+##
+
+> require("rgenoud")
+> run <- exampleRun(obj_fun, design = design, learner = lrn,
++   control = ctrl, points.per.dim = 100, show.info = TRUE
++ )
+Evaluating true objective function at 100 points.
+Performing MBO on function.
+Learner: regr.km. Settings:
+jitter=FALSE,covtype=matern3_2,optim.method=gen,nugget.stability=1e-08
+Computing y column(s) for design. Not provided.
+[mbo] 0: x=8.75 : y = 0.628 : 0.0 secs : initdesign
+[mbo] 0: x=5.67 : y = -0.575 : 0.0 secs : initdesign
+[mbo] 0: x=10.7 : y = -0.956 : 0.0 secs : initdesign
+[mbo] 0: x=3.3 : y = -0.154 : 0.0 secs : initdesign
+[mbo] 0: x=13 : y = 0.399 : 0.0 secs : initdesign
+[mbo] 0: x=6.98 : y = 0.639 : 0.0 secs : initdesign
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 4.461093e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.01974836 4.461093 
+  - best initial criterion value(s) :  -11.66827 
+
+
+Sun Sep  3 17:14:25 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 1.974836e-02   <=  X2   <=    4.461093e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-1.166827e+01
+      1 	-5.545093e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -5.545093e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	1.000000e-10	G[ 1] :	-0.000000e+00
+ X[ 2] :	3.717578e-01	G[ 2] :	-1.283212e-08
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:25 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 1: x=7.96 : y = 0.995 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 5.13979e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.03491878 5.13979 
+  - best initial criterion value(s) :  -7.021649 
+
+
+Sun Sep  3 17:14:26 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 3.491878e-02   <=  X2   <=    5.139790e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-7.021649e+00
+      1 	-6.424637e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -6.424637e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	9.867620e-01	G[ 1] :	4.565754e-07
+ X[ 2] :	4.173497e-01	G[ 2] :	3.108237e-07
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:26 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 2: x=11.1 : y = -0.996 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 6.017565e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.03990737 6.017565 
+  - best initial criterion value(s) :  -110.712 
+
+
+Sun Sep  3 17:14:26 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 3.990737e-02   <=  X2   <=    6.017565e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-1.153822e+01
+      1 	-6.302884e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -6.302884e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	1.282247e+00	G[ 1] :	-1.001967e-07
+ X[ 2] :	4.357874e-01	G[ 2] :	-1.329955e-08
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:26 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 3: x=10.9 : y = -0.997 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 6.364777e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.0519577 6.364777 
+  - best initial criterion value(s) :  -286.4609 
+
+
+Sun Sep  3 17:14:26 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 5.195770e-02   <=  X2   <=    6.364777e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-2.165059e+01
+      1 	-4.243451e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -4.243451e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	1.675265e+00	G[ 1] :	2.594364e-08
+ X[ 2] :	4.980871e-01	G[ 2] :	-2.552160e-07
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:26 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 4: x=4.76 : y = -0.999 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 6.442643e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.04396755 6.442643 
+  - best initial criterion value(s) :  -268.8132 
+
+
+Sun Sep  3 17:14:27 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 4.396755e-02   <=  X2   <=    6.442643e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-6.485835e+00
+      1 	-4.774097e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -4.774097e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	1.951843e+00	G[ 1] :	-1.362995e-06
+ X[ 2] :	6.172226e-01	G[ 2] :	-6.916281e-06
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:27 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 5: x=4.99 : y = -0.963 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 6.324822e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.04394949 6.324822 
+  - best initial criterion value(s) :  -313.6809 
+
+
+Sun Sep  3 17:14:27 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 4.394949e-02   <=  X2   <=    6.324822e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-1.018737e+01
+      1 	-3.226222e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -3.226222e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	2.281727e+00	G[ 1] :	-2.750395e-08
+ X[ 2] :	7.108940e-01	G[ 2] :	2.776690e-08
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:27 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 6: x=4.48 : y = -0.974 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 6.161572e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.04857453 6.161572 
+  - best initial criterion value(s) :  -1.768268 
+
+
+Sun Sep  3 17:14:28 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 4.857453e-02   <=  X2   <=    6.161572e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	-1.768268e+00
+      1 	-1.718291e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: -1.718291e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	2.625969e+00	G[ 1] :	-2.628361e-08
+ X[ 2] :	8.427727e-01	G[ 2] :	-2.589747e-08
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:28 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 7: x=4.65 : y = -0.998 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 5.992066e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.05208799 5.992066 
+  - best initial criterion value(s) :  -19.90309 
+
+
+Sun Sep  3 17:14:28 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 5.208799e-02   <=  X2   <=    5.992066e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	4.845386e-01
+      1 	1.624017e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: 1.624017e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	2.988062e+00	G[ 1] :	4.848602e-10
+ X[ 2] :	9.970806e-01	G[ 2] :	-3.024577e-09
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:28 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 8: x=11.4 : y = -0.93 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 5.746699e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.04429048 5.746699 
+  - best initial criterion value(s) :  1.907586 
+
+
+Sun Sep  3 17:14:28 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 4.429048e-02   <=  X2   <=    5.746699e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	1.907586e+00
+      1 	3.301174e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: 3.301174e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	3.353779e+00	G[ 1] :	7.441458e-07
+ X[ 2] :	1.183099e+00	G[ 2] :	-1.053361e-07
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:28 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 9: x=11 : y = -1 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 5.560467e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.04177607 5.560466 
+  - best initial criterion value(s) :  2.277247 
+
+
+Sun Sep  3 17:14:29 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 4.177607e-02   <=  X2   <=    5.560466e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	6.814068e+00
+      1 	7.527654e+00
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: 7.527654e+00
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	3.715013e+00	G[ 1] :	8.371464e-09
+ X[ 2] :	1.379824e+00	G[ 2] :	-1.447585e-08
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:29 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+[mbo] 10: x=4.71 : y = -1 : 0.0 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : gen 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : 5.372899e-09 
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  19.36123 
+  - variance bounds :  0.04313953 5.372899 
+  - best initial criterion value(s) :  -35.50808 
+
+
+Sun Sep  3 17:14:29 2023
+Domains:
+ 1.000000e-10   <=  X1   <=    1.936123e+01 
+ 4.313953e-02   <=  X2   <=    5.372899e+00 
+
+Data Type: Floating Point
+Operators (code number, name, population) 
+	(1) Cloning........................... 	3
+	(2) Uniform Mutation.................. 	0
+	(3) Boundary Mutation................. 	0
+	(4) Non-Uniform Mutation.............. 	0
+	(5) Polytope Crossover................ 	0
+	(6) Simple Crossover.................. 	0
+	(7) Whole Non-Uniform Mutation........ 	0
+	(8) Heuristic Crossover............... 	0
+	(9) Local-Minimum Crossover........... 	0
+
+HARD Maximum Number of Generations: 5
+Maximum Nonchanging Generations: 2
+Population size       : 4
+Convergence Tolerance: 1.000000e-03
+
+Using the BFGS Derivative Based Optimizer on the Best Individual Each Generation.
+Not Checking Gradients before Stopping.
+Not Using Out of Bounds Individuals and Not Allowing Trespassing.
+
+Maximization Problem.
+
+
+Generation#	    Solution Value
+
+      0 	1.225053e+01
+      1 	1.243830e+01
+
+'wait.generations' limit reached.
+No significant improvement in 2 generations.
+
+Solution Fitness Value: 1.243830e+01
+
+Parameters at the Solution (parameter, gradient):
+
+ X[ 1] :	4.071300e+00	G[ 1] :	-4.266489e-05
+ X[ 2] :	1.593071e+00	G[ 2] :	1.368886e-05
+
+Solution Found Generation 1
+Number of Generations Run 4
+
+Sun Sep  3 17:14:29 2023
+Total run time : 0 hours 0 minutes and 0 seconds
+> 
+> # Ejecutar de a uno
+> plotExampleRun(run, iters = 1, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 2, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 3, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 5, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 6, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 7, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 8, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 9, densregion = TRUE, pause = FALSE)
+> plotExampleRun(run, iters = 10, densregion = TRUE, pause = FALSE)
+> 
+> 
+> ## ---------------------------
+> ## Step 9: Introduciendo la técnica en nuestro conjunto
+> ## ---------------------------
+> 
+> resultados_maxdepth <- data.table()
+> 
+> for (v in 4:20) {
++   r <- data.table(
++     md = v,
++     auc = experimento_rpart(dataset, semillas, md = v)
++   )
++   resultados_maxdepth <- rbindlist(list(resultados_maxdepth, r))
++ }
+> 
+> saveRDS(object = resultados_maxdepth,
++   file = "./301_resultados_maxdepth.rds"
++ )
+> 
+> ggplot(resultados_maxdepth, aes(md, auc)) + geom_point()
+> 
+> ## ---------------------------
+> ## Step 9: Buscando con una Opt. Bayesiana para 1 parámetro
+> ## ---------------------------
+> 
+> set.seed(semillas[1])
+> obj_fun_md <- function(x) {
++   experimento_rpart(dataset, semillas, md = x$maxdepth)
++ }
+> 
+> obj_fun <- makeSingleObjectiveFunction(
++   minimize = FALSE,
++   fn = obj_fun_md,
++   par.set = makeParamSet(
++     makeIntegerParam("maxdepth",  lower = 4L, upper = 20L)
++   ),
++   # noisy = TRUE,
++   has.simple.signature = FALSE
++ )
+> 
+> ctrl <- makeMBOControl()
+> ctrl <- setMBOControlTermination(ctrl, iters = 10L)
+> ctrl <- setMBOControlInfill(
++   ctrl,
++   crit = makeMBOInfillCritEI(),
++   opt = "focussearch",
++   opt.focussearch.points = 2
++ )
+> 
+> lrn <- makeMBOLearner(ctrl, obj_fun)
+> 
+> surr_km <- makeLearner("regr.km", predict.type = "se", covtype = "matern3_2")
+> 
+> run_md <- mbo(obj_fun, learner = surr_km, control = ctrl)
+Computing y column(s) for design. Not provided.
+[mbo] 0: maxdepth=16 : y = 0.79 : 9.3 secs : initdesign
+[mbo] 0: maxdepth=7 : y = 0.857 : 5.7 secs : initdesign
+[mbo] 0: maxdepth=19 : y = 0.79 : 9.5 secs : initdesign
+[mbo] 0: maxdepth=8 : y = 0.853 : 6.0 secs : initdesign
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  24 
+  - best initial criterion value(s) :  10.71322 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -10.713  |proj g|=    0.0045478
+At iterate     1  f =      -10.713  |proj g|=     0.0044426
+At iterate     2  f =      -10.714  |proj g|=    0.00011437
+At iterate     3  f =      -10.714  |proj g|=    2.7732e-06
+At iterate     4  f =      -10.714  |proj g|=    1.6734e-09
+
+iterations 4
+function evaluations 5
+segments explored during Cauchy searches 4
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 1.67342e-09
+final function value -10.7137
+
+F = -10.7137
+final  value -10.713662 
+converged
+[mbo] 1: maxdepth=10 : y = 0.834 : 7.2 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  24 
+  - best initial criterion value(s) :  14.64952 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=       -14.65  |proj g|=    0.0016003
+At iterate     1  f =       -14.65  |proj g|=     0.0015572
+At iterate     2  f =       -14.65  |proj g|=    1.3481e-05
+At iterate     3  f =       -14.65  |proj g|=    1.1217e-07
+
+iterations 3
+function evaluations 4
+segments explored during Cauchy searches 3
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 1.12167e-07
+final function value -14.6496
+
+F = -14.6496
+final  value -14.649570 
+converged
+[mbo] 2: maxdepth=12 : y = 0.81 : 7.7 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  24 
+  - best initial criterion value(s) :  18.69531 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -18.695  |proj g|=     0.019442
+At iterate     1  f =      -18.696  |proj g|=      0.019046
+At iterate     2  f =      -18.704  |proj g|=     0.0030986
+At iterate     3  f =      -18.704  |proj g|=    0.00039417
+At iterate     4  f =      -18.704  |proj g|=    6.9131e-06
+At iterate     5  f =      -18.704  |proj g|=     1.581e-08
+
+iterations 5
+function evaluations 6
+segments explored during Cauchy searches 5
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 1.58097e-08
+final function value -18.7038
+
+F = -18.7038
+final  value -18.703803 
+converged
+[mbo] 3: maxdepth=5 : y = 0.852 : 4.7 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  28 
+  - best initial criterion value(s) :  22.14748 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -22.147  |proj g|=    0.0071381
+At iterate     1  f =      -22.148  |proj g|=     0.0067205
+At iterate     2  f =      -22.148  |proj g|=    0.00018302
+At iterate     3  f =      -22.148  |proj g|=    4.5147e-06
+At iterate     4  f =      -22.148  |proj g|=    2.9298e-09
+
+iterations 4
+function evaluations 5
+segments explored during Cauchy searches 4
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 2.92984e-09
+final function value -22.1479
+
+F = -22.1479
+final  value -22.147912 
+converged
+[mbo] 4: maxdepth=6 : y = 0.861 : 5.1 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  28 
+  - best initial criterion value(s) :  23.94225 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -23.942  |proj g|=      0.24519
+At iterate     1  f =      -24.002  |proj g|=       0.23986
+At iterate     2  f =      -24.364  |proj g|=      0.057912
+Nonpositive definiteness in Cholesky factorization in formk;
+   refresh the lbfgs memory and restart the iteration.
+At iterate     3  f =      -24.367  |proj g|=      0.046691
+At iterate     4  f =      -24.373  |proj g|=     0.0057386
+At iterate     5  f =      -24.373  |proj g|=    0.00047637
+At iterate     6  f =      -24.373  |proj g|=    4.3235e-06
+At iterate     7  f =      -24.373  |proj g|=    3.3015e-09
+
+iterations 7
+function evaluations 11
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 3.30148e-09
+final function value -24.3726
+
+F = -24.3726
+final  value -24.372613 
+converged
+[mbo] 5: maxdepth=9 : y = 0.844 : 6.8 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  28 
+  - best initial criterion value(s) :  29.07934 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -29.079  |proj g|=       0.2141
+At iterate     1  f =      -29.124  |proj g|=       0.20672
+At iterate     2  f =      -29.353  |proj g|=      0.091166
+At iterate     3  f =      -29.378  |proj g|=     0.0051263
+At iterate     4  f =      -29.378  |proj g|=     0.0011278
+At iterate     5  f =      -29.378  |proj g|=     1.048e-05
+At iterate     6  f =      -29.378  |proj g|=    2.1142e-08
+
+iterations 6
+function evaluations 9
+segments explored during Cauchy searches 6
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 2.11422e-08
+final function value -29.3785
+
+F = -29.3785
+final  value -29.378492 
+converged
+[mbo] 6: maxdepth=14 : y = 0.795 : 8.4 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  28 
+  - best initial criterion value(s) :  33.32802 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -33.328  |proj g|=      0.18171
+At iterate     1  f =       -33.36  |proj g|=       0.17312
+At iterate     2  f =      -33.521  |proj g|=      0.046549
+At iterate     3  f =      -33.527  |proj g|=     0.0042351
+At iterate     4  f =      -33.527  |proj g|=    0.00045543
+At iterate     5  f =      -33.527  |proj g|=    3.8554e-06
+At iterate     6  f =      -33.527  |proj g|=    3.4683e-09
+
+iterations 6
+function evaluations 9
+segments explored during Cauchy searches 6
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 3.46826e-09
+final function value -33.5272
+
+F = -33.5272
+final  value -33.527240 
+converged
+[mbo] 7: maxdepth=20 : y = 0.796 : 9.4 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  30 
+  - best initial criterion value(s) :  37.12375 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -37.124  |proj g|=      0.22877
+At iterate     1  f =      -37.176  |proj g|=       0.22395
+At iterate     2  f =      -37.502  |proj g|=      0.072968
+Nonpositive definiteness in Cholesky factorization in formk;
+   refresh the lbfgs memory and restart the iteration.
+At iterate     3  f =      -37.507  |proj g|=      0.060478
+At iterate     4  f =      -37.516  |proj g|=      0.011845
+At iterate     5  f =      -37.517  |proj g|=     0.0014674
+At iterate     6  f =      -37.517  |proj g|=    3.0237e-05
+At iterate     7  f =      -37.517  |proj g|=    7.9498e-08
+
+iterations 7
+function evaluations 11
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 7.94976e-08
+final function value -37.5167
+
+F = -37.5167
+final  value -37.516685 
+converged
+[mbo] 8: maxdepth=17 : y = 0.791 : 9.2 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  30 
+  - best initial criterion value(s) :  41.67109 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -41.671  |proj g|=      0.22541
+At iterate     1  f =      -41.721  |proj g|=       0.22022
+At iterate     2  f =      -42.027  |proj g|=      0.074997
+Nonpositive definiteness in Cholesky factorization in formk;
+   refresh the lbfgs memory and restart the iteration.
+At iterate     3  f =      -42.032  |proj g|=       0.06229
+At iterate     4  f =      -42.042  |proj g|=      0.013027
+At iterate     5  f =      -42.042  |proj g|=     0.0016994
+At iterate     6  f =      -42.042  |proj g|=    3.9118e-05
+At iterate     7  f =      -42.042  |proj g|=    1.2137e-07
+
+iterations 7
+function evaluations 11
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 1.21374e-07
+final function value -42.0422
+
+F = -42.0422
+final  value -42.042198 
+converged
+[mbo] 9: maxdepth=11 : y = 0.816 : 7.7 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  30 
+  - best initial criterion value(s) :  43.53066 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -43.531  |proj g|=      0.33939
+At iterate     1  f =      -43.647  |proj g|=       0.34457
+ys=-1.756e-03  -gs= 1.152e-01, BFGS update SKIPPED
+At iterate     2  f =      -44.483  |proj g|=       0.16782
+At iterate     3  f =       -44.53  |proj g|=       0.02582
+At iterate     4  f =       -44.53  |proj g|=     0.0078783
+At iterate     5  f =       -44.53  |proj g|=    0.00025126
+At iterate     6  f =       -44.53  |proj g|=    2.3385e-06
+
+iterations 6
+function evaluations 11
+segments explored during Cauchy searches 6
+BFGS updates skipped 1
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 2.33847e-06
+final function value -44.5304
+
+F = -44.5304
+final  value -44.530449 
+converged
+[mbo] 10: maxdepth=13 : y = 0.804 : 8.1 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 
+  - parameters upper bounds :  30 
+  - best initial criterion value(s) :  48.60664 
+
+N = 1, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -48.607  |proj g|=      0.32534
+At iterate     1  f =      -48.713  |proj g|=       0.32842
+ys=-1.002e-03  -gs= 1.058e-01, BFGS update SKIPPED
+At iterate     2  f =      -49.236  |proj g|=       0.28474
+At iterate     3  f =      -49.472  |proj g|=      0.086112
+Nonpositive definiteness in Cholesky factorization in formk;
+   refresh the lbfgs memory and restart the iteration.
+At iterate     4  f =      -49.479  |proj g|=      0.058915
+At iterate     5  f =      -49.483  |proj g|=     0.0087895
+At iterate     6  f =      -49.484  |proj g|=    0.00073076
+At iterate     7  f =      -49.484  |proj g|=    8.1031e-06
+At iterate     8  f =      -49.484  |proj g|=    7.5889e-09
+
+iterations 8
+function evaluations 13
+segments explored during Cauchy searches 9
+BFGS updates skipped 1
+active bounds at final generalized Cauchy point 0
+norm of the final projected gradient 7.58893e-09
+final function value -49.4836
+
+F = -49.4836
+final  value -49.483560 
+converged
+> print(run_md)
+Recommended parameters:
+maxdepth=6
+Objective: y = 0.861
+
+Optimization path
+4 + 10 entries in total, displaying last 10 (or less):
+   maxdepth         y dob eol error.message exec.time             ei
+5        10 0.8335494   1  NA          <NA>     7.220  -4.015210e-06
+6        12 0.8099687   2  NA          <NA>     7.682  -5.395937e-20
+7         5 0.8516301   3  NA          <NA>     4.665  -4.572494e-03
+8         6 0.8611405   4  NA          <NA>     5.077  -2.024554e-04
+9         9 0.8439839   5  NA          <NA>     6.772  -2.227717e-13
+10       14 0.7946225   6  NA          <NA>     8.365  -7.004856e-28
+11       20 0.7959126   7  NA          <NA>     9.369  -4.676517e-35
+12       17 0.7906897   8  NA          <NA>     9.222 -1.353425e-107
+13       11 0.8159409   9  NA          <NA>     7.654  -4.675859e-80
+14       13 0.8035392  10  NA          <NA>     8.073 -5.398979e-102
+   error.model train.time prop.type propose.time          se      mean
+5         <NA>      0.021 infill_ei        0.147 0.006659414 0.8377859
+6         <NA>      0.020 infill_ei        0.153 0.005196809 0.8140817
+7         <NA>      0.021 infill_ei        0.153 0.006515883 0.8601853
+8         <NA>      0.021 infill_ei        0.152 0.001530894 0.8557493
+9         <NA>      0.024 infill_ei        0.154 0.002686970 0.8447506
+10        <NA>      0.024 infill_ei        0.152 0.006389764 0.7960504
+11        <NA>      0.023 infill_ei        0.153 0.005941689 0.7918144
+12        <NA>      0.025 infill_ei        0.154 0.003372643 0.7882866
+13        <NA>      0.025 infill_ei        0.153 0.002147380 0.8215721
+14        <NA>      0.025 infill_ei        0.152 0.002780523 0.8027788
+> 
+> saveRDS(object = run_md,
++   file = "./301_run_md.rds"
++ )
+> 
+> ## ---------------------------
+> ## Step 10: Buscando con una Opt. Bayesiana para 2 parámetros
+> ## ---------------------------
+> 
+> set.seed(semillas[1])
+> obj_fun_md_ms <- function(x) {
++   experimento_rpart(dataset,
++     semillas,
++     md = x$maxdepth,
++     ms = x$minsplit
++   )
++ }
+> 
+> obj_fun <- makeSingleObjectiveFunction(
++   minimize = FALSE,
++   fn = obj_fun_md_ms,
++   par.set = makeParamSet(
++     makeIntegerParam("maxdepth",  lower = 4L, upper = 20L),
++     makeIntegerParam("minsplit",  lower = 1L, upper = 200L)
++     # makeNumericParam <- para parámetros continuos
++   ),
++   # noisy = TRUE,
++   has.simple.signature = FALSE
++ )
+> 
+> ctrl <- makeMBOControl()
+> ctrl <- setMBOControlTermination(ctrl, iters = 16L)
+> ctrl <- setMBOControlInfill(
++   ctrl,
++   crit = makeMBOInfillCritEI(),
++   opt = "focussearch",
++   # sacar parámetro opt.focussearch.points en próximas ejecuciones
++   opt.focussearch.points = 20
++ )
+> 
+> lrn <- makeMBOLearner(ctrl, obj_fun)
+> 
+> surr_km <- makeLearner("regr.km", predict.type = "se", covtype = "matern3_2")
+> 
+> run_md_ms <- mbo(obj_fun, learner = surr_km, control = ctrl, )
+Computing y column(s) for design. Not provided.
+[mbo] 0: maxdepth=14; minsplit=5 : y = 0.673 : 8.6 secs : initdesign
+[mbo] 0: maxdepth=9; minsplit=103 : y = 0.869 : 6.3 secs : initdesign
+[mbo] 0: maxdepth=7; minsplit=161 : y = 0.872 : 5.8 secs : initdesign
+[mbo] 0: maxdepth=15; minsplit=95 : y = 0.859 : 8.2 secs : initdesign
+[mbo] 0: maxdepth=20; minsplit=64 : y = 0.84 : 9.0 secs : initdesign
+[mbo] 0: maxdepth=18; minsplit=148 : y = 0.868 : 8.6 secs : initdesign
+[mbo] 0: maxdepth=4; minsplit=177 : y = 0.846 : 4.6 secs : initdesign
+[mbo] 0: maxdepth=12; minsplit=40 : y = 0.838 : 7.6 secs : initdesign
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 344 
+  - best initial criterion value(s) :  12.20262 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -12.203  |proj g|=     0.071238
+At iterate     1  f =      -12.208  |proj g|=      0.070863
+At iterate     2  f =      -12.815  |proj g|=     0.0069265
+At iterate     3  f =      -12.828  |proj g|=     0.0051654
+At iterate     4  f =      -12.841  |proj g|=     0.0018794
+At iterate     5  f =      -12.842  |proj g|=    0.00033299
+At iterate     6  f =      -12.842  |proj g|=    1.7739e-05
+At iterate     7  f =      -12.842  |proj g|=    1.7933e-07
+At iterate     8  f =      -12.842  |proj g|=    9.5387e-11
+
+iterations 8
+function evaluations 9
+segments explored during Cauchy searches 9
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 9.5387e-11
+final function value -12.8418
+
+F = -12.8418
+final  value -12.841825 
+converged
+[mbo] 1: maxdepth=4; minsplit=135 : y = 0.846 : 4.3 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 344 
+  - best initial criterion value(s) :  14.36878 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -14.369  |proj g|=      0.06727
+At iterate     1  f =      -14.373  |proj g|=      0.066884
+At iterate     2  f =      -14.924  |proj g|=     0.0085939
+At iterate     3  f =      -14.947  |proj g|=     0.0070596
+At iterate     4  f =      -14.976  |proj g|=    0.00056006
+At iterate     5  f =      -14.976  |proj g|=    0.00026518
+At iterate     6  f =      -14.976  |proj g|=    5.7597e-06
+At iterate     7  f =      -14.976  |proj g|=    5.7467e-08
+
+iterations 7
+function evaluations 9
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 5.74672e-08
+final function value -14.9758
+
+F = -14.9758
+final  value -14.975796 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 8 points instead of 20!
+[mbo] 2: maxdepth=20; minsplit=163 : y = 0.871 : 8.5 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 344 
+  - best initial criterion value(s) :  17.21385 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -17.214  |proj g|=     0.061113
+At iterate     1  f =      -17.218  |proj g|=      0.060813
+At iterate     2  f =      -17.345  |proj g|=      0.014308
+At iterate     3  f =      -17.589  |proj g|=      0.011027
+At iterate     4  f =      -17.768  |proj g|=     0.0066768
+At iterate     5  f =      -17.809  |proj g|=     0.0017892
+At iterate     6  f =       -17.81  |proj g|=     0.0014052
+At iterate     7  f =      -17.811  |proj g|=      0.000133
+At iterate     8  f =      -17.811  |proj g|=    8.8145e-06
+At iterate     9  f =      -17.811  |proj g|=    6.0609e-08
+
+iterations 9
+function evaluations 12
+segments explored during Cauchy searches 10
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 6.06086e-08
+final function value -17.8108
+
+F = -17.8108
+final  value -17.810806 
+converged
+[mbo] 3: maxdepth=4; minsplit=74 : y = 0.846 : 4.6 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 344 
+  - best initial criterion value(s) :  19.38524 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -19.385  |proj g|=     0.058245
+At iterate     1  f =      -19.389  |proj g|=      0.057969
+At iterate     2  f =      -19.501  |proj g|=       0.01257
+At iterate     3  f =      -20.152  |proj g|=     0.0017377
+At iterate     4  f =      -20.153  |proj g|=    2.9876e-05
+At iterate     5  f =      -20.153  |proj g|=    1.2833e-06
+At iterate     6  f =      -20.153  |proj g|=    1.0137e-09
+
+iterations 6
+function evaluations 11
+segments explored during Cauchy searches 7
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.0137e-09
+final function value -20.1528
+
+F = -20.1528
+final  value -20.152754 
+converged
+[mbo] 4: maxdepth=13; minsplit=157 : y = 0.869 : 7.5 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 344 
+  - best initial criterion value(s) :  22.33725 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -22.337  |proj g|=     0.064002
+At iterate     1  f =      -22.342  |proj g|=      0.063704
+At iterate     2  f =      -22.503  |proj g|=      0.018413
+At iterate     3  f =      -23.683  |proj g|=     0.0090338
+At iterate     4  f =      -23.693  |proj g|=    0.00082493
+At iterate     5  f =      -23.693  |proj g|=     8.865e-05
+At iterate     6  f =      -23.693  |proj g|=    1.0329e-06
+At iterate     7  f =      -23.693  |proj g|=    1.2709e-09
+
+iterations 7
+function evaluations 12
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.27093e-09
+final function value -23.6927
+
+F = -23.6927
+final  value -23.692666 
+converged
+[mbo] 5: maxdepth=20; minsplit=115 : y = 0.863 : 8.8 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 344 
+  - best initial criterion value(s) :  25.3183 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -25.318  |proj g|=     0.075577
+At iterate     1  f =      -25.324  |proj g|=      0.075185
+At iterate     2  f =       -25.47  |proj g|=      0.015594
+At iterate     3  f =      -26.372  |proj g|=    0.00060104
+At iterate     4  f =      -26.372  |proj g|=    1.7026e-05
+At iterate     5  f =      -26.372  |proj g|=    1.8652e-07
+
+iterations 5
+function evaluations 12
+segments explored during Cauchy searches 6
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.86517e-07
+final function value -26.3719
+
+F = -26.3719
+final  value -26.371944 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 10 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 4 points instead of 20!
+[mbo] 6: maxdepth=19; minsplit=200 : y = 0.872 : 8.3 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  27.10052 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -27.101  |proj g|=     0.058997
+At iterate     1  f =      -27.104  |proj g|=       0.05858
+At iterate     2  f =      -27.189  |proj g|=     0.0089179
+At iterate     3  f =      -27.307  |proj g|=     0.0078446
+At iterate     4  f =       -27.96  |proj g|=    0.00086016
+Nonpositive definiteness in Cholesky factorization in formk;
+   refresh the lbfgs memory and restart the iteration.
+At iterate     5  f =       -27.96  |proj g|=    0.00065103
+At iterate     6  f =       -27.96  |proj g|=    1.0933e-05
+At iterate     7  f =       -27.96  |proj g|=    1.4266e-07
+
+iterations 7
+function evaluations 16
+segments explored during Cauchy searches 10
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.42659e-07
+final function value -27.96
+
+F = -27.96
+final  value -27.960035 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 15 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 4 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 10 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 4 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 14 points instead of 20!
+[mbo] 7: maxdepth=8; minsplit=200 : y = 0.873 : 6.1 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  29.97938 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -29.979  |proj g|=     0.066798
+At iterate     1  f =      -29.984  |proj g|=      0.066294
+At iterate     2  f =      -30.067  |proj g|=     0.0042025
+At iterate     3  f =      -30.081  |proj g|=     0.0034681
+At iterate     4  f =      -30.125  |proj g|=      0.002287
+At iterate     5  f =      -30.663  |proj g|=     0.0013146
+At iterate     6  f =      -30.663  |proj g|=    0.00026557
+At iterate     7  f =      -30.663  |proj g|=    6.1904e-06
+At iterate     8  f =      -30.663  |proj g|=     3.027e-08
+
+iterations 8
+function evaluations 17
+segments explored during Cauchy searches 9
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 3.02704e-08
+final function value -30.6634
+
+F = -30.6634
+final  value -30.663353 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 12 points instead of 20!
+[mbo] 8: maxdepth=13; minsplit=200 : y = 0.87 : 7.4 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  34.06217 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -34.062  |proj g|=     0.095548
+At iterate     1  f =      -34.071  |proj g|=      0.094707
+At iterate     2  f =      -34.187  |proj g|=     0.0036897
+At iterate     3  f =      -34.196  |proj g|=      0.003103
+At iterate     4  f =      -34.222  |proj g|=     0.0011944
+At iterate     5  f =      -34.781  |proj g|=    0.00082947
+At iterate     6  f =      -34.782  |proj g|=    0.00026754
+At iterate     7  f =      -34.782  |proj g|=    3.7001e-06
+At iterate     8  f =      -34.782  |proj g|=    1.6881e-08
+
+iterations 8
+function evaluations 18
+segments explored during Cauchy searches 9
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.68806e-08
+final function value -34.7816
+
+F = -34.7816
+final  value -34.781562 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 19 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 14 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 14 points instead of 20!
+[mbo] 9: maxdepth=4; minsplit=110 : y = 0.846 : 4.3 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  37.74278 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -37.743  |proj g|=       0.1122
+At iterate     1  f =      -37.755  |proj g|=       0.11098
+At iterate     2  f =      -37.887  |proj g|=     0.0023719
+At iterate     3  f =       -37.89  |proj g|=     0.0018445
+At iterate     4  f =      -37.894  |proj g|=    5.2845e-05
+At iterate     5  f =      -37.894  |proj g|=    1.0007e-06
+At iterate     6  f =      -37.894  |proj g|=    4.7192e-10
+
+iterations 6
+function evaluations 8
+segments explored during Cauchy searches 7
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 4.71924e-10
+final function value -37.8936
+
+F = -37.8936
+final  value -37.893573 
+converged
+[mbo] 10: maxdepth=9; minsplit=161 : y = 0.872 : 6.2 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  41.89341 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -41.893  |proj g|=      0.11952
+At iterate     1  f =      -41.908  |proj g|=       0.11821
+At iterate     2  f =      -42.049  |proj g|=     0.0041828
+At iterate     3  f =      -42.082  |proj g|=     0.0028292
+At iterate     4  f =      -42.127  |proj g|=     0.0022628
+At iterate     5  f =      -42.295  |proj g|=    0.00065992
+At iterate     6  f =      -42.295  |proj g|=    0.00058658
+At iterate     7  f =      -42.295  |proj g|=    2.5981e-05
+At iterate     8  f =      -42.295  |proj g|=    9.6047e-07
+At iterate     9  f =      -42.295  |proj g|=    1.6627e-09
+
+iterations 9
+function evaluations 15
+segments explored during Cauchy searches 10
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.66266e-09
+final function value -42.2947
+
+F = -42.2947
+final  value -42.294720 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 14 points instead of 20!
+[mbo] 11: maxdepth=4; minsplit=53 : y = 0.846 : 4.6 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  45.25531 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -45.255  |proj g|=      0.12161
+At iterate     1  f =       -45.27  |proj g|=        0.1202
+At iterate     2  f =      -45.411  |proj g|=    0.00017218
+At iterate     3  f =      -45.411  |proj g|=    0.00015435
+At iterate     4  f =      -45.411  |proj g|=    9.0778e-07
+At iterate     5  f =      -45.411  |proj g|=    4.6514e-09
+
+iterations 5
+function evaluations 7
+segments explored during Cauchy searches 6
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 4.6514e-09
+final function value -45.4115
+
+F = -45.4115
+final  value -45.411492 
+converged
+[mbo] 12: maxdepth=10; minsplit=63 : y = 0.857 : 6.8 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  48.49195 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -48.492  |proj g|=      0.16052
+At iterate     1  f =      -48.518  |proj g|=       0.15848
+At iterate     2  f =      -48.704  |proj g|=     0.0067622
+At iterate     3  f =      -48.784  |proj g|=     0.0043253
+At iterate     4  f =      -48.853  |proj g|=    0.00062591
+At iterate     5  f =      -48.854  |proj g|=    6.2084e-05
+At iterate     6  f =      -48.854  |proj g|=    6.4446e-06
+At iterate     7  f =      -48.854  |proj g|=    5.8615e-08
+
+iterations 7
+function evaluations 11
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 5.86154e-08
+final function value -48.854
+
+F = -48.854
+final  value -48.854029 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 18 points instead of 20!
+[mbo] 13: maxdepth=20; minsplit=155 : y = 0.87 : 8.6 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  53.12257 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -53.123  |proj g|=      0.16046
+At iterate     1  f =      -53.148  |proj g|=       0.15827
+At iterate     2  f =      -53.331  |proj g|=     0.0029138
+At iterate     3  f =      -53.342  |proj g|=      0.001812
+At iterate     4  f =      -53.351  |proj g|=    0.00027867
+At iterate     5  f =      -53.351  |proj g|=    4.4407e-05
+At iterate     6  f =      -53.351  |proj g|=    1.6487e-06
+At iterate     7  f =      -53.351  |proj g|=    1.0578e-08
+
+iterations 7
+function evaluations 10
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.05776e-08
+final function value -53.3509
+
+F = -53.3509
+final  value -53.350946 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 18 points instead of 20!
+[mbo] 14: maxdepth=8; minsplit=152 : y = 0.874 : 5.8 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  57.78431 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -57.784  |proj g|=      0.15721
+At iterate     1  f =      -57.809  |proj g|=       0.15486
+At iterate     2  f =      -57.987  |proj g|=     0.0030641
+At iterate     3  f =       -57.99  |proj g|=     0.0027096
+At iterate     4  f =      -58.001  |proj g|=    5.3744e-05
+At iterate     5  f =      -58.001  |proj g|=     4.483e-07
+At iterate     6  f =      -58.001  |proj g|=    9.5366e-12
+
+iterations 6
+function evaluations 8
+segments explored during Cauchy searches 7
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 9.53662e-12
+final function value -58.0006
+
+F = -58.0006
+final  value -58.000643 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 18 points instead of 20!
+[mbo] 15: maxdepth=8; minsplit=191 : y = 0.874 : 6.2 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  61.65729 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -61.657  |proj g|=      0.16657
+At iterate     1  f =      -61.685  |proj g|=       0.16353
+At iterate     2  f =      -61.992  |proj g|=     0.0077101
+At iterate     3  f =      -62.007  |proj g|=     0.0065625
+At iterate     4  f =       -62.05  |proj g|=     0.0004765
+At iterate     5  f =       -62.05  |proj g|=    3.8342e-05
+At iterate     6  f =       -62.05  |proj g|=    2.8052e-07
+At iterate     7  f =       -62.05  |proj g|=    1.6802e-10
+
+iterations 7
+function evaluations 9
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 1.68016e-10
+final function value -62.0503
+
+F = -62.0503
+final  value -62.050341 
+converged
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 18 points instead of 20!
+Warning in generateDesign(control$infill.opt.focussearch.points, ps.local,  :
+  generateDesign could only produce 18 points instead of 20!
+[mbo] 16: maxdepth=20; minsplit=188 : y = 0.871 : 8.4 secs : infill_ei
+
+optimisation start
+------------------
+* estimation method   : MLE 
+* optimisation method : BFGS 
+* analytical gradient : used
+* trend model : ~1
+* covariance model : 
+  - type :  matern3_2 
+  - nugget : NO
+  - parameters lower bounds :  1e-10 1e-10 
+  - parameters upper bounds :  32 390 
+  - best initial criterion value(s) :  66.07266 
+
+N = 2, M = 5 machine precision = 2.22045e-16
+At X0, 0 variables are exactly at the bounds
+At iterate     0  f=      -66.073  |proj g|=      0.17555
+At iterate     1  f =      -66.103  |proj g|=       0.17227
+At iterate     2  f =       -66.43  |proj g|=      0.011183
+At iterate     3  f =      -66.463  |proj g|=     0.0093502
+At iterate     4  f =      -66.544  |proj g|=    0.00098675
+At iterate     5  f =      -66.545  |proj g|=    0.00011821
+At iterate     6  f =      -66.545  |proj g|=    1.9732e-06
+At iterate     7  f =      -66.545  |proj g|=    4.0775e-09
+
+iterations 7
+function evaluations 9
+segments explored during Cauchy searches 8
+BFGS updates skipped 0
+active bounds at final generalized Cauchy point 1
+norm of the final projected gradient 4.07746e-09
+final function value -66.5446
+
+F = -66.5446
+final  value -66.544637 
+converged
+> print(run_md_ms)
+Recommended parameters:
+maxdepth=8; minsplit=191
+Objective: y = 0.874
+
+Optimization path
+8 + 16 entries in total, displaying last 10 (or less):
+   maxdepth minsplit         y dob eol error.message exec.time            ei
+15        8      200 0.8732159   7  NA          <NA>     6.132 -0.0032624312
+16       13      200 0.8704424   8  NA          <NA>     7.388 -0.0023808664
+17        4      110 0.8459078   9  NA          <NA>     4.264 -0.0016809297
+18        9      161 0.8722652  10  NA          <NA>     6.151 -0.0030832441
+19        4       53 0.8457523  11  NA          <NA>     4.643 -0.0019582658
+20       10       63 0.8573285  12  NA          <NA>     6.785 -0.0012841963
+21       20      155 0.8702657  13  NA          <NA>     8.556 -0.0011568058
+22        8      152 0.8740752  14  NA          <NA>     5.779 -0.0010767519
+23        8      191 0.8741622  15  NA          <NA>     6.155 -0.0006993661
+24       20      188 0.8710162  16  NA          <NA>     8.443 -0.0010633433
+   error.model train.time prop.type propose.time          se      mean
+15        <NA>      0.042 infill_ei        0.256 0.021073710 0.8582642
+16        <NA>      0.030 infill_ei        0.196 0.005772773 0.8733700
+17        <NA>      0.031 infill_ei        0.233 0.013008135 0.8633475
+18        <NA>      0.025 infill_ei        0.200 0.003248334 0.8759332
+19        <NA>      0.029 infill_ei        0.203 0.021078644 0.8533562
+20        <NA>      0.024 infill_ei        0.194 0.009384658 0.8664085
+21        <NA>      0.027 infill_ei        0.208 0.004390401 0.8718610
+22        <NA>      0.026 infill_ei        0.209 0.003775491 0.8722612
+23        <NA>      0.025 infill_ei        0.200 0.005737282 0.8695309
+24        <NA>      0.027 infill_ei        0.218 0.004078972 0.8728732
+> 
+> saveRDS(object = run_md_ms,
++   file = "./301_run_md_ms.rds"
++ )
+> 
+> ## Visualizamos
+> iter <- as.data.frame(run_md_ms$opt.path)
+> ggplot(iter, aes(y = minsplit, x = maxdepth, color = prop.type)) + geom_point(aes(size = y))
+> 
+> saveRDS(object = iter,
++   file = "./301_iter.rds"
++ )
+> 
+> proc.time()
+   user  system elapsed 
+658.989 101.429 621.517 
