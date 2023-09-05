@@ -1,45 +1,56 @@
-# Arbol elemental con libreria  rpart
-# Debe tener instaladas las librerias  data.table  ,  rpart  y  rpart.plot
+# Arbol elemental con la biblioteca rpart
+# Debe tener instaladas las biblioteca: data.table, rpart y rpart.plot
 
-# cargo las librerias que necesito
-require("data.table")
-require("rpart")
-require("rpart.plot")
+# cargo las bibliotecas que necesito
+if (!require("data.table")) {
+  install.packages("data.table")
+}
+library("data.table")
 
 # Aqui se debe poner la carpeta de la materia de SU computadora local
-setwd("X:\\gdrive\\uba2023\\") # Establezco el Working Directory
+# setwd("X:\\gdrive\\uba2023\\") # Establezco el Working Directory
 
 # cargo el dataset
-dataset <- fread("./datasets/competencia_01.csv")
+dataset <- fread("../datasets/competencia_01.csv")
 
 dtrain <- dataset[foto_mes == 202103] # defino donde voy a entrenar
 dapply <- dataset[foto_mes == 202105] # defino donde voy a aplicar el modelo
 
 # genero el modelo,  aqui se construye el arbol
+if (!require("rpart")) {
+  install.packages("rpart")
+}
+library("rpart")
+
 # quiero predecir clase_ternaria a partir de el resto de las variables
 modelo <- rpart(
-        formula = "clase_ternaria ~ .",
-        data = dtrain, # los datos donde voy a entrenar
-        xval = 0,
-        cp = -0.3, # esto significa no limitar la complejidad de los splits
-        minsplit = 0, # minima cantidad de registros para que se haga el split
-        minbucket = 1, # tamaño minimo de una hoja
-        maxdepth = 3
-) # profundidad maxima del arbol
+  formula = "clase_ternaria ~ .",
+  data = dtrain, # los datos donde voy a entrenar
+  xval = 0, # no hago cross validation
+  cp = -0.3, # esto significa no limitar la complejidad de los splits
+  minsplit = 0, # minima cantidad de registros para que se haga el split
+  minbucket = 1, # tamaño minimo de una hoja
+  maxdepth = 3 # profundidad maxima del arbol
+)
 
 
 # grafico el arbol
+if (!require("rpart.plot")) {
+  install.packages("rpart.plot")
+}
+library("rpart.plot")
+
 prp(modelo,
-        extra = 101, digits = -5,
-        branch = 1, type = 4, varlen = 0, faclen = 0
+  extra = 101, digits = -5,
+  branch = 1, type = 4, varlen = 0, faclen = 0
 )
 
 
 # aplico el modelo a los datos nuevos
 prediccion <- predict(
-        object = modelo,
-        newdata = dapply,
-        type = "prob"
+  object = modelo,
+  newdata = dapply,
+  type = "prob"
 )
 
 # prediccion es una matriz con TRES columnas,
@@ -60,6 +71,6 @@ dir.create("./exp/KA2001")
 
 # solo los campos para Kaggle
 fwrite(dapply[, list(numero_de_cliente, Predicted)],
-        file = "./exp/KA2001/K101_001.csv",
-        sep = ","
+  file = "./exp/KA2001/K101_001.csv",
+  sep = ","
 )

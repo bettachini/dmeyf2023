@@ -1,0 +1,1 @@
+R CMD BATCH your_r_script.R

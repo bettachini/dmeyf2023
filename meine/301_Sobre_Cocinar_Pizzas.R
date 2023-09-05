@@ -47,7 +47,7 @@ if (!require("data.table")) {
   install.packages("data.table")
 }
 library("data.table")
-dataset <- fread("./competencia_01.csv")
+dataset <- fread("../../competencia_01.csv")
 
 # Nos quedamos solo con el 202101
 dataset <- dataset[foto_mes == 202103]
