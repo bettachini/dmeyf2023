@@ -1,5 +1,21 @@
 # Log
 
+## 2023-09-09
+BO no sirvió para mejorar
+
+HT3440/k20230909_06
++1 maxdepth
+  xval = 0, # no hago cross validation
+  cp = -0.3, # esto significa no limitar la complejidad de los splits
+  minsplit = 1100, # minima cantidad de registros para que se haga el split
+  minbucket = 330, # tamaño minimo de una hoja
+  maxdepth = 9 # profundidad maxima del arbol
+Score: 51.93958
+
+
+
+
+
 ## 2023-09-05
 ### Corridas
 Con código de salida
@@ -33,7 +49,7 @@ para la paralerización.
 Al parecer las bibliotecas instaladas operan correctamente,
 
 
-## 2023-09-04
+## 2023-09-04 | notas de clase
 tres vías de mejora
 - rpart
 - feature engineering
