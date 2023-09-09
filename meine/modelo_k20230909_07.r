@@ -25,7 +25,7 @@ library("rpart")
 modelo <- rpart(
   formula = "clase_ternaria ~ .", # esto es clase_ternaria = f( todas las demas variables )
   data = dtrain, # los datos donde voy a entrenar
-  xval = 5, # cross validation
+  xval = 5, # no hago cross validation
   cp = -7, # esto significa no limitar la complejidad de los splits
   minsplit = 400, # minima cantidad de registros para que se haga el split
   minbucket = 200, # tamaño minimo de una hoja

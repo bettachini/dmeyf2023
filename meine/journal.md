@@ -3,6 +3,15 @@
 ## 2023-09-09
 BO no sirvió para mejorar
 
+
+HT3440/k20230909_07
+  xval = 5, # no hago cross validation
+  cp = -7, # esto significa no limitar la complejidad de los splits
+  minsplit = 400, # minima cantidad de registros para que se haga el split
+  minbucket = 200, # tamaño minimo de una hoja
+  maxdepth = 9 # profundidad maxima del arbol
+
+
 HT3440/k20230909_06
 +1 maxdepth
   xval = 0, # no hago cross validation

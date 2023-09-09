@@ -335,3 +335,10 @@ resultados_grid_search
 ## La GRAN pregunta:
 ## - ¿Qué otra cosita de la materia tiene una partición 70 / 30?
 ## - Todo lo que hemos visto ¿Va a afectar a esa cosita?.
+
+# own
+## read RDS file
+cosa <- readRDS(file = './201_resultados_grid_search.rds')
+class(cosa)
+setorder(cosa, -gan)
+cosa
