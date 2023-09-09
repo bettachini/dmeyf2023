@@ -25,10 +25,10 @@ library("rpart")
 modelo <- rpart(
   formula = "clase_ternaria ~ .", # esto es clase_ternaria = f( todas las demas variables )
   data = dtrain, # los datos donde voy a entrenar
-  xval = 5, # no hago cross validation
-  cp = -0.89, # esto significa no limitar la complejidad de los splits
-  minsplit = 2202, # minima cantidad de registros para que se haga el split
-  minbucket = 419, # tamaño minimo de una hoja
+  xval = 1, # no hago cross validation
+  cp = -0.998, # esto significa no limitar la complejidad de los splits
+  minsplit = 1017, # minima cantidad de registros para que se haga el split
+  minbucket = 501, # tamaño minimo de una hoja
   maxdepth = 6 # profundidad maxima del arbol
 )
 
@@ -39,11 +39,11 @@ if (!require("rpart.plot")) {
 }
 library("rpart.plot")
 
-prp(modelo,
-  extra = 101, digits = -5,
-  branch = 1, type = 4, varlen = 0, faclen = 0
-)
-
+#prp(modelo,
+#  extra = 101, digits = -5,
+#  branch = 1, type = 4, varlen = 0, faclen = 0
+#)
+#
 
 # aplico el modelo a los datos nuevos
 prediccion <- predict(
@@ -71,6 +71,6 @@ dapply[, Predicted := as.numeric(prob_baja2 > corte)]
 
 # solo los campos para Kaggle
 fwrite(dapply[, list(numero_de_cliente, Predicted)],
-  file = "./exp/KA2001/k2023090x_0x.csv",
+  file = "./exp/HT3440/k20230909_04.csv",
   sep = ","
 )
