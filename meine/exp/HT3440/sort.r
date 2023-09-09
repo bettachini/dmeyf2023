@@ -10,4 +10,4 @@ class(bo_log_dt)
 setorder(bo_log_dt, -ganancia)
 
 # write to file
-fwrite(bo_log_dt, "./exp/HT3440/BO_log_sorted.txt", sep = "\t", row.names = FALSE)
+fwrite(bo_log_dt, "./exp/HT3440/BO_log_sorted.dat", sep = "\t", row.names = FALSE)
