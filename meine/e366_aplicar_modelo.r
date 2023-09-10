@@ -4,6 +4,7 @@
 rm(list = ls()) # remove all objects
 gc() # garbage collection
 
+
 # cargo las librerias que necesito
 require("data.table")
 require("rpart")
@@ -13,7 +14,7 @@ require("rpart")
 #  deben copiarse a mano
 PARAM <- list()
 
-PARAM$experimento <- "KA4000-03"
+PARAM$experimento <- "KA4000-01"
 
 # puede ser { "ternaria", "binaria1", "binaria2" }
 PARAM$clase <- "ternaria"
@@ -25,7 +26,7 @@ PARAM$oversampling <- 0
 
 # poner algo mayor a cero si se quiere cortar por probabilidad
 #  generalmente debe ser 0.025 , si se quiere cortar por probabilidad
-PARAM$prob_corte <-  1/40
+PARAM$prob_corte <-  0.025
 # PARAM$prob_corte <-  -1
 
 # poner -1 si se quiere cortar por probabilidad
@@ -35,9 +36,9 @@ PARAM$corte <- -1
 
 # estos valores son simplemente de ejemplo
 PARAM$rpart$cp <- -1
-PARAM$rpart$minsplit <- 409
+PARAM$rpart$minsplit <- 422 
 PARAM$rpart$minbucket <- 203
-PARAM$rpart$maxdepth <- 8
+PARAM$rpart$maxdepth <- 9
 
 #------------------------------------------------------------------------------
 #Aqui comienza el programa
@@ -89,7 +90,7 @@ if( PARAM$oversampling > 0 )
 modelo <- rpart(
         formula = "clase_nueva ~ . -clase_ternaria",
         data = dtrain, # los datos donde voy a entrenar
-        xval = 5,
+        xval = 0,
         control = PARAM$rpart,
         weights =  vector_pesos
 )

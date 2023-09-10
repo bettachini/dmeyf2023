@@ -2,13 +2,52 @@
 
 
 ## 2023-09-10
-`366_aplicar_modelo.r` up and running
-Produjo copia de score mejor con 
+
+corro `366_aplicar_modelo.r`
+        xval = 5,
 PARAM$rpart$cp <- -1
-PARAM$rpart$minsplit <- 400 
-PARAM$rpart$minbucket <- 200
+PARAM$rpart$minsplit <- 409 
+PARAM$rpart$minbucket <- 203
+PARAM$rpart$maxdepth <- 8
+KA4000-03_kaggle.csv
+?
+
+
+Con resultados de 
+R CMD BATCH 322_rpart_ternaria_BO_repe_xval.r &
+corro `366_aplicar_modelo.r`
+        xval = 5,
+PARAM$rpart$cp <- -1
+PARAM$rpart$minsplit <- 422 
+PARAM$rpart$minbucket <- 203
 PARAM$rpart$maxdepth <- 9
-Score: 56.79288
+KA4000-02_kaggle.csv
+Score: 54.6929
+¡Que decepción!
+
+
+R CMD BATCH 322_rpart_ternaria_BO_repe_xval.r &
+Produjo BO_log_322.txt
+fecha	cp	minsplit	minbucket	maxdepth	xval_repeats	xval_folds	ganancia	iteracion
+20230910 162814	-1	408	203	8	5	5	69605200	1
+20230910 163150	-1	401	193	8	5	5	68754000	2
+20230910 163545	-1	444	210	9	5	5	68833800	3
+20230910 163926	-1	417	186	9	5	5	68910800	4
+20230910 164252	-1	446	178	8	5	5	67671800	5
+20230910 164628	-1	430	194	8	5	5	68758200	6
+20230910 165010	-1	387	181	9	5	5	67380600	7
+20230910 165348	-1	437	195	9	5	5	68581800	8
+20230910 165709	-1	449	206	8	5	5	69055000	9
+20230910 170033	-1	415	178	8	5	5	68096000	10
+20230910 170418	-1	400	189	9	5	5	68146400	11
+20230910 170802	-1	424	190	9	5	5	68027400	12
+20230910 171131	-1	413	202	8	5	5	69641600	13
+20230910 171521	-1	442	181	9	5	5	68264000	14
+20230910 171845	-1	409	203	8	5	5	69605200	15
+20230910 172234	-1	422	203	9	5	5	68749800	16
+Eniendo la última como la valedera
+
+
 
 Intento optimización Bayesiana que justifique hiperparámetros
 R CMD BATCH 322_rpart_ternaria_BO_repe_xval.r &
@@ -20,6 +59,15 @@ R CMD BATCH 322_rpart_ternaria_BO_repe_xval.r &
   forbidden = quote(minbucket > 0.5 * minsplit)
 ```
 
+`366_aplicar_modelo.r` up and running
+Produjo copia de score mejor con 
+PARAM$rpart$cp <- -1
+PARAM$rpart$minsplit <- 400 
+PARAM$rpart$minbucket <- 200
+PARAM$rpart$maxdepth <- 9
+KA4000-01_kaggle.csv
+Score: 56.79288
+Copiado a `e366_aplicar_modelo.r`
 
 
 No hay tiempo de búsquedas más elegantes
