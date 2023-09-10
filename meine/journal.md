@@ -1,14 +1,28 @@
 # Log
 
 
-## 2023-09-i0
+## 2023-09-10
+No hay tiempo de búsquedas más elegantes
+sPodría jugar con el nivel de corte
+
+
+best ms+= 50
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
+  minsplit = 450, # minima cantidad de registros para que se haga el split
+  minbucket = 225, # tamaño minimo de una hoja
+  maxdepth = 9 # profundidad maxima del arbol
+`./exp/HT3440/k20230910_07`
+Score: 53.9229
+
+
 Al tanteo maxdepth +1
   xval = 0, # no hago cross validation
   cp = -1, # esto significa no limitar la complejidad de los splits
   minsplit = 400, # minima cantidad de registros para que se haga el split
   minbucket = 200, # tamaño minimo de una hoja
   maxdepth = 10 # profundidad maxima del arbol
-`./exp/HT3440/k20230910_05`
+`./exp/HT3440/k20230910_06`
 Score: 48.18295
 
 maxdepth -1
