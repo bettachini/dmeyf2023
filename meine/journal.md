@@ -1,5 +1,87 @@
 # Log
 
+
+## 2023-09-i0
+Al tanteo maxdepth +1
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
+  minsplit = 400, # minima cantidad de registros para que se haga el split
+  minbucket = 200, # tamaño minimo de una hoja
+  maxdepth = 10 # profundidad maxima del arbol
+`./exp/HT3440/k20230910_05`
+Score: 48.18295
+
+maxdepth -1
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
+  minsplit = 400, # minima cantidad de registros para que se haga el split
+  minbucket = 200, # tamaño minimo de una hoja
+  maxdepth = 8 # profundidad maxima del arbol
+`./exp/HT3440/k20230910_05`
+Score: 54.64623
+
+
+Ídem. con +1 maxdepth
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
+  minsplit = 350, # minima cantidad de registros para que se haga el split
+  minbucket = 175, # tamaño minimo de una hoja
+  maxdepth = 9 # profundidad maxima del arbol
+`./exp/HT3440/k20230910_04`
+Score: 51.61292
+
+Pruebo el primer valor del grid search
+Modifico `modelo_k20230910_02.r`
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
+  minsplit = 350, # minima cantidad de registros para que se haga el split
+  minbucket = 175, # tamaño minimo de una hoja
+  maxdepth = 8 # profundidad maxima del arbol
+`./exp/HT3440/k20230910_03`
+Score: 51.49625
+
+
+Hice un grid search en torno al mejor valor de minsplit (400)
+eGS.r
+- ms \pm 50
+- mb = ms/2
+- md (depth) el mismo (9) y probé bajar uno a 8
+     tiempo cp  mb  ms md      gan
+1: 60.29366 -7 175 350  8 61922000
+2: 66.24819 -7 175 350  9 60074000
+3: 66.09959 -7 200 400  9 58776667
+4: 60.08216 -7 200 400  8 58711333
+5: 59.35792 -7 225 450  8 57288000
+6: 65.23138 -7 225 450  9 56574000
+
+
+OK! -> diff exp/HT3440/k20230910_01.csv exp/HT3440/k20230910_02.csv -> ¡NADA!
+Verificar: cp= -1 es lo mismo que -7
+Encontre una fuent sobre que demonios en el [complexity parameter (cp)](https://cran.r-project.org/web/packages/rpart/vignettes/longintro.pdf)  
+Pero no hay un joraca claro en la documentación de Rpart.
+Solo buscaba el como interpreta valoren negativos y no lo encuentro.
+HT3440/k20230910_02
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
+  minsplit = 400, # minima cantidad de registros para que se haga el split
+  minbucket = 200, # tamaño minimo de una hoja
+  maxdepth = 9 # profundidad maxima del arbol
+)
+Mismo resultado
+
+
+OK!  -> Mismo score
+Verificar: quitar cross validation no cambia el resultado
+HT3440/k20230910_01
+  xval = 0, # no hago cross validation
+  cp = -7, # esto significa no limitar la complejidad de los splits
+  minsplit = 400, # minima cantidad de registros para que se haga el split
+  minbucket = 200, # tamaño minimo de una hoja
+  maxdepth = 9 # profundidad maxima del arbol
+)
+Score: 56.79288
+
+
 ## 2023-09-09
 BO no sirvió para mejorar
 
@@ -10,7 +92,7 @@ HT3440/k20230909_07
   minsplit = 400, # minima cantidad de registros para que se haga el split
   minbucket = 200, # tamaño minimo de una hoja
   maxdepth = 9 # profundidad maxima del arbol
-
+Score: 56.79288
 
 HT3440/k20230909_06
 +1 maxdepth

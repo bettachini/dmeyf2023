@@ -1,5 +1,8 @@
 # Arbol elemental con la biblioteca rpart
-# Debe tener instaladas las biblioteca: data.table, rpart y rpart.plot
+
+# Limpiamos el entorno
+rm(list = ls())
+gc(verbose = FALSE)
 
 # cargo las bibliotecas que necesito
 if (!require("data.table")) {
@@ -25,25 +28,12 @@ library("rpart")
 modelo <- rpart(
   formula = "clase_ternaria ~ .", # esto es clase_ternaria = f( todas las demas variables )
   data = dtrain, # los datos donde voy a entrenar
-  xval = 5, # no hago cross validation
-  cp = -7, # esto significa no limitar la complejidad de los splits
+  xval = 0, # no hago cross validation
+  cp = -1, # esto significa no limitar la complejidad de los splits
   minsplit = 400, # minima cantidad de registros para que se haga el split
   minbucket = 200, # tamaño minimo de una hoja
-  maxdepth = 9 # profundidad maxima del arbol
+  maxdepth = 10 # profundidad maxima del arbol
 )
-
-
-# grafico el arbol
-if (!require("rpart.plot")) {
-  install.packages("rpart.plot")
-}
-library("rpart.plot")
-
-#prp(modelo,
-#  extra = 101, digits = -5,
-#  branch = 1, type = 4, varlen = 0, faclen = 0
-#)
-#
 
 # aplico el modelo a los datos nuevos
 prediccion <- predict(
@@ -61,16 +51,11 @@ dapply[, prob_baja2 := prediccion[, "BAJA+2"]]
 
 # solo le envio estimulo a los registros
 #  con probabilidad de BAJA+2 mayor  a  corte
-corte <- 1/40
+corte <- 1/40 # nunca modifiqué este nivel 
 dapply[, Predicted := as.numeric(prob_baja2 > corte)]
-
-# genero el archivo para Kaggle
-# primero creo la carpeta donde va el experimento
-# dir.create("./exp/")
-# dir.create("./exp/KA2001")
 
 # solo los campos para Kaggle
 fwrite(dapply[, list(numero_de_cliente, Predicted)],
-  file = "./exp/HT3440/k20230909_07.csv",
+  file = "./exp/HT3440/k20230910_06.csv",
   sep = ","
 )
