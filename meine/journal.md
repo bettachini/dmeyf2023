@@ -2,6 +2,26 @@
 
 
 ## 2023-09-10
+`366_aplicar_modelo.r` up and running
+Produjo copia de score mejor con 
+PARAM$rpart$cp <- -1
+PARAM$rpart$minsplit <- 400 
+PARAM$rpart$minbucket <- 200
+PARAM$rpart$maxdepth <- 9
+Score: 56.79288
+
+Intento optimización Bayesiana que justifique hiperparámetros
+R CMD BATCH 322_rpart_ternaria_BO_repe_xval.r &
+```
+  makeNumericParam("cp", lower = -1, upper = -1),
+  makeIntegerParam("minsplit", lower = 350L, upper = 450L),
+  makeIntegerParam("minbucket", lower = 175L, upper = 225L),
+  makeIntegerParam("maxdepth", lower = 8L, upper = 9L),
+  forbidden = quote(minbucket > 0.5 * minsplit)
+```
+
+
+
 No hay tiempo de búsquedas más elegantes
 sPodría jugar con el nivel de corte
 
