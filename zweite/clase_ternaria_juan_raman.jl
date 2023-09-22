@@ -2,7 +2,8 @@ using CSV,  DataFrames
 
 periodo_anterior(x::Integer) =  x % 100 > 1  ?  x-1  : 12 + (div(x,100) -1) * 100
 
-df = CSV.read("../../datasets/competencia_01_crudo.csv", DataFrame)
+df = CSV.read("../../datasets/competencia_02_crudo.csv.gz", DataFrame)
+# df = CSV.read("../../datasets/competencia_01_crudo.csv", DataFrame)
 # df = CSV.read("competencia_01_crudo.csv", DataFrame)
 sort!(df, [:numero_de_cliente, :foto_mes])
 
@@ -28,5 +29,6 @@ for i in 1:last
   end
 end
 
-CSV.write( "../../datasets/competencia_01_julia.csv", df )
+CSV.write( "../../datasets/competencia_02.csv.gz", df; compress=true )
+# CSV.write( "../../datasets/competencia_01_julia.csv", df )
 # CSV.write( "competencia_01_julia.csv", df )

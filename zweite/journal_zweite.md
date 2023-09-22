@@ -36,6 +36,9 @@ No intento utilizar para esto el repositorio git para mantener el .gitignore ori
 WA | Maxi Beckel 
 > Yo ando medio trabado con el calculo de la clase ternaria. Me tirarían un centro? 😬 Vi lo que subio Alejantro a Zulip pero todo lo que hago da error o devuelve algo raro
 
+Alejandro Bolaño proveyó en [Zulip | Code > [tip] Ayuda para crear el target ](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/401-Code/topic/.5Btip.5D.20Ayuda.20para.20crear.20el.20target) una solución basada en SQL.
+
+
 WA | Cele  
 > hola! yo usé un código de zulip que creo subio juan raman (?). está en julia, yo ni idea de julia pero lo calcula perfecto
 
@@ -50,4 +53,36 @@ Descomprimí en `~/bin/` con lo que el sendero al ejecutable `~/bin/julia-1.9.3/
 VSCode: instalé la extensión y establecí el sendero. 
 
 Al ejecutar el .jl indica que no tiene el paquete CSV y el como instalarle. En terminal abrí el interprete de Julia y comandé `import Pkg; Pkg.add("CSV")`.
-Ídem con DataFrames, `import Pkg; Pkg.add("DataFrames")` 
+Ídem con DataFrames, `import Pkg; Pkg.add("DataFrames")`
+
+Hice una corrida primero con el dataset de la primer competencia cambiando el sendero relativo. Verifique que en la salida se agregó la columna de clase ternaria con `head competencia_01_julia.csv`
+
+Modifiqué
+- esendero para qu apunte al nuevo crudo `df = CSV.read("../../datasets/competencia_02_crudo.csv.gz", DataFrame)
+
+`
+Con cd al directorio donde está el script de Julia (para ahorrarse el problema de los senderos relativos) ejecuté
+```
+~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/dmeyf2023/zweite$ ~/bin/julia-1.9.3/bin/julia ./clase_ternaria_juan_raman.jl 
+```
+
+### **PENDIENTE** subir el dataset a la máquina virtual
+1. Abro el [bucket el sendero normanbuck/datasets](https://console.cloud.google.com/storage/browser/normanbuck/datasets) en la interfaz web de Google Cloud 
+1. Uso la opción `Upload files` para subir el archivo `competencia_02.csv.gz` generado en el paso anterior.
+
+
+
+### **PENDIENTE** z521_ArbolesAzarosos
+WA | Verónica Lombardo
+> sos del lunes no se si es lo mismo que nosotros, son dos mundos distintos, pero en nuestro caso para poder subir un intento primero tuvimos que armar la clase ternaria, después el camino más rápido es usar árboles azarosos, te arma 6 salidas rapidamente, sino optimización bayesiana que tarda una banda
+
+WA | Ismael Marchesini
+> Buenas! consulta, los que corrieron z521_ArbolesAzarosos en google cloud, les corrió de una o les tiró algun error?
+
+1. Copié de /src a /zweite `z521_ArbolesAzarosos.r` 
+1. le renombre quitándole el z
+1. Semilla
+```
+# Establezco la semilla aleatoria, cambiar por SU primer semilla
+PARAM$semilla <- 777787
+```
