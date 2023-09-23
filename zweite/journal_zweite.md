@@ -1,5 +1,74 @@
 # Journal
 
+
+## 2023-09-23
+
+### **pendiente** Seguir
+En `dmeyf2023/src/lightgbm` figuran 
+- `z523_lightgbm_binaria_BO.r`
+- `z524_lightgbm_final.r`
+
+
+#### Me llama el seguir el orden numérico `z523_lightgbm_binaria_BO.r`
+1. copio `src/lightgbm/z523_lightgbm_binaria_BO.r` a `zweite/523_lightgbm_binaria_BO.r`
+
+
+
+### z521_ArbolesAzarosos | ejecución
+En `z521_ArbolesAzarosos.r` figura este encabezado
+```
+# Ensemble de arboles de decision
+# utilizando el naif metodo de Arboles Azarosos
+# entreno cada arbol utilizando un subset distinto de atributos del dataset
+```
+
+Estos fueron los pasos para la ejecución y subida de resultados a Kaggle:  
+
+1. Conecté con la máquina virtual `desktop` a través de RDP (con el software Remmina) pues no pude conectar vía ssh al IP externo (indicó que se rechazada conexión en puerto 22)
+1. cd ~/dmeyf2023/zweite
+1. `./R CMD BATCH 521_arboles_azarosos.r &`
+1. Cerré la conexión
+1. Monitoree la actividad en la [Compute engine / VM Instances / desktop / observability](https://console.cloud.google.com/compute/instancesDetail/zones/southamerica-east1-b/instances/desktop?project=dmeyf2023&tab=monitoring)
+1. Al bajar a cero la utilización de la CPU estaban las salidas listas para bajar
+1. En `cloud storage / buckets / normanbuck / exp` podían bajarse los archivos en forma individual. Para bajar todos instalé google cloud CLI (ver notasGoogleCloud.md)
+1. Creeado `~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/normanbuck/` que mantendrá un espejo de lo que está en Google Cloud
+1. `cd ~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/normanbuck/exp` 
+1. Utilicé gsutil para transferir los resultados guardados en directorio KA5210
+```
+gsutil -m cp -r \
+  "gs://normanbuck/exp/KA5210" \
+  .
+Copying gs://normanbuck/exp/KA5210/.RData...
+Copying gs://normanbuck/exp/KA5210/KA5210_010.csv...                            
+Copying gs://normanbuck/exp/KA5210/KA5210_001.csv...                            
+Copying gs://normanbuck/exp/KA5210/KA5210_005.csv...                            
+Copying gs://normanbuck/exp/KA5210/KA5210_100.csv...                            
+Copying gs://normanbuck/exp/KA5210/KA5210_200.csv...                            
+Copying gs://normanbuck/exp/KA5210/KA5210_050.csv...                            
+Copying gs://normanbuck/exp/KA5210/KA5210_500.csv...
+```
+1. Cargué un Kaggle manualmente las siete salidas.
+1. Mejor puntaje    `KA5210_200.csv  Score: 135.10165`
+Copio debaje los parámetros que figuran en el fuente
+```
+PARAM$semilla <- 777787
+
+PARAM$feature_fraction <- 0.5
+
+PARAM$num_trees_max <- 500
+
+  "cp" = -1,
+  "minsplit" = 250,
+  "minbucket" = 100,
+  "maxdepth" = 14
+
+    xval = 0,
+
+    umbral_corte <- (1 / 40) * arbolito
+```
+el `_200` se refiere al tamaño de ensemble grabado en disco, aunque se hayan generado 500 en la corrida.
+
+
 ## 2023-09-22
 Tuve que recurrir a una consulta de un compañero en WA para saber donde empezar:
 Instrucciones en [Zulip | Cartelera](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/389-cartelera)  
@@ -66,13 +135,13 @@ Con cd al directorio donde está el script de Julia (para ahorrarse el problema 
 ~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/dmeyf2023/zweite$ ~/bin/julia-1.9.3/bin/julia ./clase_ternaria_juan_raman.jl 
 ```
 
-### **PENDIENTE** subir el dataset a la máquina virtual
+### subir el dataset a la máquina virtual
 1. Abro el [bucket el sendero normanbuck/datasets](https://console.cloud.google.com/storage/browser/normanbuck/datasets) en la interfaz web de Google Cloud 
 1. Uso la opción `Upload files` para subir el archivo `competencia_02.csv.gz` generado en el paso anterior.
 
 
 
-### **PENDIENTE** z521_ArbolesAzarosos
+### z521_ArbolesAzarosos | establecer parámetros
 WA | Verónica Lombardo
 > sos del lunes no se si es lo mismo que nosotros, son dos mundos distintos, pero en nuestro caso para poder subir un intento primero tuvimos que armar la clase ternaria, después el camino más rápido es usar árboles azarosos, te arma 6 salidas rapidamente, sino optimización bayesiana que tarda una banda
 
@@ -86,3 +155,5 @@ WA | Ismael Marchesini
 # Establezco la semilla aleatoria, cambiar por SU primer semilla
 PARAM$semilla <- 777787
 ```
+
+A través de git le hice un pull en la máquina virtual `desktop`

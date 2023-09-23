@@ -38,21 +38,14 @@ PARAM <- list()
 PARAM$experimento <- "HT5230"
 
 PARAM$input$dataset <- "./datasets/competencia_02.csv.gz"
-# recordar de luego usar uno con los targets y features que se fueron creando 
 
  # los meses en los que vamos a entrenar
 PARAM$input$training <- c(202101, 202102, 202103, 202104, 202105)
-# una de las mejores estratégias es entrenar con más meses
-# elección de meses cruciales redunda en buen score en la competencia
-
 
 # un undersampling de 0.1  toma solo el 10% de los CONTINUA
-PARAM$trainingstrategy$undersampling <- 1.0 # con 1.0 no hace undersampling
-# con cierto undersampling se puede correr en una computadora local
-
-PARAM$trainingstrategy$semilla_azar <- 102191 # Aqui poner su  primer  semilla
-
-
+PARAM$trainingstrategy$undersampling <- 1.0
+PARAM$trainingstrategy$semilla_azar <- 777787 # Aqui poner su  primer  semilla
+# PARAM$trainingstrategy$semilla_azar <- 102191 # Aqui poner su  primer  semilla
 
 PARAM$hyperparametertuning$iteraciones <- 100
 PARAM$hyperparametertuning$xval_folds <- 5
@@ -69,7 +62,6 @@ hs <- makeParamSet(
   makeNumericParam("feature_fraction", lower = 0.2, upper = 1.0),
   makeIntegerParam("min_data_in_leaf", lower = 1L, upper = 8000L),
   makeIntegerParam("num_leaves", lower = 16L, upper = 1024L),
-  # número de hojas en el nodo terminal
   makeIntegerParam("envios", lower = 5000L, upper = 15000L)
 )
 
@@ -155,10 +147,10 @@ EstimarGanancia_lightgbm <- function(x) {
     verbosity = -100,
     max_depth = -1, # -1 significa no limitar,  por ahora lo dejo fijo
     min_gain_to_split = 0.0, # por ahora, lo dejo fijo
-    lambda_l1 = 0.0, # por ahora, lo dejo fijo (regularizacion, i.e. Lasso, castiga la complejidad del árbol)
-    lambda_l2 = 0.0, # por ahora, lo dejo fijo (regularizacion, i.e. Ridge)
-    max_bin = 31, # por ahora, lo dejo fijo (cómo corta cada variable en bines)
-    num_iterations = 9999, # valor grande, lo limita early_stopping_rounds (si luego de ciertas cantidad de iteraciones no mejoró el resultado, corta)
+    lambda_l1 = 0.0, # por ahora, lo dejo fijo
+    lambda_l2 = 0.0, # por ahora, lo dejo fijo
+    max_bin = 31, # por ahora, lo dejo fijo
+    num_iterations = 9999, # valor grande, lo limita early_stopping_rounds
     force_row_wise = TRUE, # para evitar warning
     seed = PARAM$hyperparametertuning$semilla_azar
   )
