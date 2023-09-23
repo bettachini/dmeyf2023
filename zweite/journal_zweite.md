@@ -8,13 +8,32 @@ En `dmeyf2023/src/lightgbm` figuran
 - `z523_lightgbm_binaria_BO.r`
 - `z524_lightgbm_final.r`
 
+Me llama el seguir el orden numérico 
 
-#### Me llama el seguir el orden numérico `z523_lightgbm_binaria_BO.r`
+
+####  `z523_lightgbm_binaria_BO.r` | ejecución [?]
 1. copio `src/lightgbm/z523_lightgbm_binaria_BO.r` a `zweite/523_lightgbm_binaria_BO.r`
+1. única modificación
+```
+PARAM$trainingstrategy$semilla_azar <- 777787 # Aqui poner su  primer  semilla
+``` 
+1. push para que esté disponible en `desktop`. No es necesario el pull, siempre le encuentro actualizado tras iniciar la máquina (no sé si será una revisión períodica o solo al iniciar)
+1. inicio ejecución 1752Z-3. 
+1. Generó `normanbuck/exp/HT5230`
+1. **ERRROR** Olvidé 2.a semilla -> **LEER TODO EL CÓDIGO ANTES DE ENVIAR A EJECUTAR**
+```
+# Aqui poner su segunda semilla
+PARAM$hyperparametertuning$semilla_azar <- 274837
+# PARAM$hyperparametertuning$semilla_azar <- 200177
+```
+1. Interrumpí ejecución 1907Z-3
+1. Tras cambiar fuente le hice push y manualmente en desktop el correspondiete pull.
+1. Borré `~/bucket/b1/exp/HT5230`
+1. Inicio ejecución 19010Z-3
+1. Verifico en [Google Cloud | Cloud Storage | Buckets](https://console.cloud.google.com/storage/browser/normanbuck/exp) que se generó nuevamente `~/bucket/b1/exp/HT5230`
 
 
-
-### z521_ArbolesAzarosos | ejecución
+### z521_ArbolesAzarosos | ejecución -> normanbuck/exp/KA5210 [~ 1 h]
 En `z521_ArbolesAzarosos.r` figura este encabezado
 ```
 # Ensemble de arboles de decision
