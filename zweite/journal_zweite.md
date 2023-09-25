@@ -1,7 +1,10 @@
 # Journal
 
 
-## 2023-09-23
+### **pendiente** Generar salidas con hiperparámetros indicados
+¿Qué hago con el caso binario?
+
+
 
 ### **pendiente** Seguir
 En `dmeyf2023/src/lightgbm` figuran 
@@ -11,7 +14,29 @@ En `dmeyf2023/src/lightgbm` figuran
 Me llama el seguir el orden numérico 
 
 
-####  `z523_lightgbm_binaria_BO.r` | ejecución [?]
+## 2023-09-24
+
+###  `z523_lightgbm_binaria_BO.r` | ejecución detenida
+1. VM suspendida 0315Z-3
+1. Descargo 0633Z-3 lo que se encuentra en `normanbuck/exp/HT5230`
+```
+gsutil -m cp -r \
+  "gs://normanbuck/exp/HT5230" \
+  .
+```
+1. start/resume 0638Z-3
+1. Copia de resguardo de `normanbuck/exp/HT5230` -> `normanbuck/exp/back_HT5230` (o back2)
+1. Verifiqué que se realiza append a registro (log) de hiperparámetros/ganancia en archivo `normanbuck/exp/HT5230/HT5230.TXT` 
+1. VM suspendida 1439Z-3
+1. Copia de resguardo de `normanbuck/exp/HT5230` -> `normanbuck/exp/HT5230_20230924T1603Z-3`
+1. start/resume 1603Z-3
+
+
+
+
+## 2023-09-23
+
+###  `z523_lightgbm_binaria_BO.r` | ejecución [?]
 1. copio `src/lightgbm/z523_lightgbm_binaria_BO.r` a `zweite/523_lightgbm_binaria_BO.r`
 1. única modificación
 ```
