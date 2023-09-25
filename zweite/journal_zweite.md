@@ -1,17 +1,63 @@
 # Journal
 
+## Pendientes
 
-### **pendiente** Generar salidas con hiperparámetros indicados
-¿Qué hago con el caso binario?
+### **Pendiente** Features históricos
+[Zulip | Instrucciones de Alejandro Bolaños para generarles en SQL](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/401-Code/topic/.5Btip.5D.20features.20historicos.20usando.20SQL)
+
+### **Pendiente** Meseta
+Graficar score público vs predictedPositives 
+
+### **Pendiente** Cantidad de envíos
+?
+[Zulip | cantidad de envíos](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/430-Kaggle-02/topic/cantidad.20de.20env.C3.ADos)
+
+### **Pendiente** Revisar bibliografía:
+- Lags?
+- rank?
+
+
+## 2023-09-25
+
+### Primer optimización bayesiana | Kaggle submit
+T1300Z-3 | Descarga de resultados 
+1. Al directorio local de corridas `cd ~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/normanbuck/exp/`
+1. Descargo resultados de ejecucion con `gsutil -m cp -r "gs://normanbuck/exp/KA5240"`
+
+Instalación de CLI de Kaggle
+1. Sigo instrucciones en [Kaggle | How to Use Kaggle](https://www.kaggle.com/docs/api) que apuntan a [GitHub | Kaggle API](https://github.com/Kaggle/kaggle-api)
+1. Instale con `pip install kaggle` el En el environment python en `~/bin/jupyter/bin/` jupyter para 
+1. Creo kaggle.json token en [Kaggle | account](https://www.kaggle.com/settings/account) en la opción `Create new token`
+1. Muevo el `kaggle.json` descargado a `~/.kaggle`
+1. En [Kaggle | Submissions](https://www.kaggle.com/competitions/dmeyf-2023-segunda/submissions) muestra cada vez que se hace un submit el comando
+
+T1330Z-3 | Carga en Kaggle de resultados 
+1. `cd ~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/normanbuck/exp/KA5240_20230925T1404Z-3`
+1. `kaggle competitions submit -c dmeyf-2023-segunda -f KA5240_12500.csv -m "KA5240_12500_20230925T1404Z-3"` siendo `KA340_xxxxxx.csv` todos desde el 8k al 13k5 en saltos de 500
+1. ¿Qué hacer con .RData? Es 0.5 GB y no sé que uso puede tener
+  1. @sih `mkdir ~/storage/grandes_normanbuck/exp`
+  1. `mv ~/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/normanbuck/exp/KA5240_20230925T1404Z-3/.RData ~/storage/grandes_normanbuck/exp/KA5240_20230925T1404Z-3/`
 
 
 
-### **pendiente** Seguir
-En `dmeyf2023/src/lightgbm` figuran 
-- `z523_lightgbm_binaria_BO.r`
-- `z524_lightgbm_final.r`
+### `524_lightgbm_final.r` | ejecución
+1. copia de `dmeyf2023/src/z524_lightgbm_final.r` a `dmeyf2023/zweite/524_lightgbm_final.r`
+1. Hiperparámetros tomados de última línea de `/normanbuck/exp/HT5230_20230925T0024Z-3/HT5230.txt` copiados en fuente
+```
+PARAM$finalmodel$semilla <- 274837  # UNSERE 2.a semilla
 
-Me llama el seguir el orden numérico 
+PARAM$finalmodel$num_iterations <- 895
+PARAM$finalmodel$learning_rate <- 0.112605189048028
+PARAM$finalmodel$feature_fraction <- 0.458278684659049 
+PARAM$finalmodel$min_data_in_leaf <- 633
+PARAM$finalmodel$num_leaves <- 868
+```
+No hay cambios de `PARAM$finalmodel$max_bin <- 31`
+1. git push
+1. T1324Z-3 | activación VM desktop
+1. `cd dmeyf2023/zweite`
+1. T1327Z-3 | `R CMD BATCH 524_lightgbm_final.r` 
+
 
 
 ## 2023-09-24
