@@ -26,7 +26,7 @@ PARAM$finalmodel$semilla <- 274837  # UNSERE 2.a semilla
 
 PARAM$finalmodel$num_iterations <- 895
 PARAM$finalmodel$learning_rate <- 0.112605189048028
-PARAM$finalmodel$feature_fraction <- 0.458278684659049 
+PARAM$finalmodel$feature_fraction <- 0.458278684659049
 PARAM$finalmodel$min_data_in_leaf <- 633
 PARAM$finalmodel$num_leaves <- 868
 
