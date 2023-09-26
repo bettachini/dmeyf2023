@@ -48,4 +48,32 @@ Crear variables "a lo pavo". Hay varias alternativas:
 
 False Discovery Rate
     Emanuel Candes
- 
+
+- **Bottom line** 
+  - Usar **canaritos asesinos** (de la primer competencia)
+  - Determinar cuales son las variables/features con mayor relevancia
+  - **Matar** las que no aportan
+  - Poner a prueba los **cientos** que uno puede inventar 
+
+
+  ### MLOps
+  LLevar de un modelo a un proceso de producción
+  - E.g. no usar un notebook -> scripts completos ejecutable de corrido
+  - Raíz del término: DevOps que automatizó el procesos
+  - Con la misma idéa surgió el término DataOps
+    - Y de allí MLOps referido a machine learning
+      - produccinón
+        - ETL (Exctract Transform Load) origen - transformación - destino : data warehouse 
+        - ELT: ídem. pero procesando in situ (en el warehouse)
+      - feature engineering
+        - primero las calculadas
+        - luego las históricas
+        - si se quiere hacer imputación, sería en este paso
+      - data quality (que no aparezcan nuevos atributos)
+
+- Tendría que ser capaz de replicar este esquema en la competencia
+  - E.g. utilizar otra forma de validar que no sea cross-validation
+    - E.g. Probar estrategia de validación en el futuro parandome en 201905 y viendo hacia 202105 (fin de la serie)
+
+- **Competencia** sugerencias
+  - Ver que una ventana de algunos meses es útil, e.g. no más de 5 meses
