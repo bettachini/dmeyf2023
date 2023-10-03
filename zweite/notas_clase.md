@@ -1,11 +1,68 @@
 # Notas de clases
 
+
+## 2023-10-02
+
+## Interpretación de modelos (monday/z801 -> zweite/801_Sobre_Intepretabilidad.ipynb)
+- Hasta ahora con interpretación de variables
+- SHAP values, basado en teória de juegos cooperativos
+  - No se ve el modelo en su conjunto
+  - Se ven casos individuales
+
+
+## Video de Miranda
+- Hay que encontrar la "estructura" de la gente que se va (deja de ser cliente del banco)
+  - Sería una interpretación de los features con más importancia que inciden en el BAJA+2
+- < 5'
+  - hay que ser muy limitado
+  - muy coherente 
+  - repetir varias veces
+- Básicamente es verbalizar
+  - Solo se muestra gráfico si es más difícil expresarle en palabras
+- Mitad izquierda de pantalla: bullet points
+  - derecha: cámara
+- Es la directora de Marketing
+  - De ella dependen gerencias.
+  - Nosotros dependendemos de una de ellas con otros 20 colegas.
+
+- Ir rápido al hueso y mostrar que lo hecho resuelve los problemas del interlocutor
+- Demostar confianza.
+- Convencer al interlocutor, llevar o convencer.
+- Tener la capacidad de entender lo que está pasando para poder transmitir la escencia con claridad.
+
+- Objetivo
+  - Transmitir los descubrimientos hechos que sirvan para marketing
+
+- Costo
+  - Clientes que recibirán incentivo 10k
+  - Incentivo (envíos) 7k$
+  - durante meses 12
+  - 10k * 7k * 12 = 840M$
+    - Hay que convencer a alguién que invierta esa cantidad en la estratégia que propongo
+
+
+### ¿Qué se puede ajustar?
+1. features -> enfocarse en generarles, e.g.
+  - ctrx_active -> media, diferencia, etc.
+2. cantidad de meses que se ponen en el entrenamiento
+  - Ojo que muchos meses lleva a corridas muy largas
+  - Hay por ahí un archivo que comenta meses que funcionaron en competencias pasadas.
+  - En la optimizacinón Bayesiana se hace undersampling (se toman menos meses), pero el entrenamiento final es con todos los meses.
+3. parámetros
+  - lightgbm más allá de los que ya trabajamos  -> no tocar
+  - modificar los que veníamos trabajando, e.g.
+    - feature_fraction
+
+
+
 ## 2023-09-25
 
 ### Chisme
 - recordar que se puede seleccionar con que meses entrenar
 - sacar la pandemia
 - sacar dos meses finales y primeros
+- si vacía cuenta es un indicador fuerte
+
 
 
 ### Información histórica
