@@ -17,6 +17,44 @@ Graficar score público vs predictedPositives
 - rank?
 
 
+
+
+## 2023-10-04
+
+### Quitar meses pandemia entrenamiento
+- ¿Entrenamiento u optimización de hiperparámetros?
+
+- Para explorar hiperparámetros creo `523_lightgbm_binaria_BO_20231004_01.r` a partir de `523_lightgbm_binaria_BO.r`.
+- ASPO en CABA desde 2020-03-20 hasta 2020-11-09 [wikipedia | Medidas sanitarias por la pandemia de COVID-19 en Argentina](https://es.wikipedia.org/wiki/Medidas_sanitarias_por_la_pandemia_de_COVID-19_en_Argentina)
+
+
+
+#### Me intriga si está prediciendo solo para clientes_vip
+¡Solo 0.004415699974357906 son cliente_vip
+
+
+
+#### Explorar dataset
+Excelente...no tengo idea siquiera de que hay en el dataset -> `exploro_dataset.jl` 
+- ¿Qué meses cubre?
+  - 201901 a 202107
+- ¿Qué atributos tiene?
+  - Sé que existe una planilla de cálculo que los describe -> `economíaFinanzas/datasets/Diccionario de datos.ods`
+  - 154 atributos
+    - 1 a 110 : cosas
+    - 111 a 132 (21): master(card)
+    - 133 a 154 (21): visa
+- `exploro_dataset.jl`
+  - 4562810 registros x 155 columnas
+-
+Bueno... Estoy en el horno... Juguemos con Julia a ver cuanto tardo en aprender a leer el daset y entender su timespan.
+- creo `exploro_dataset.jl`
+- instalo en sih Extension: Julia
+- `import Pkg; Pkg.add("CSV")`
+- `import Pkg; Pkg.add("DataFrames")`
+
+
+
 ## 2023-09-25
 
 ### Primer optimización bayesiana | Kaggle submit
@@ -217,7 +255,7 @@ Al ejecutar el .jl indica que no tiene el paquete CSV y el como instalarle. En t
 Hice una corrida primero con el dataset de la primer competencia cambiando el sendero relativo. Verifique que en la salida se agregó la columna de clase ternaria con `head competencia_01_julia.csv`
 
 Modifiqué
-- esendero para qu apunte al nuevo crudo `df = CSV.read("../../datasets/competencia_02_crudo.csv.gz", DataFrame)
+- sendero para que apunte al nuevo crudo `df = CSV.read("../../datasets/competencia_02_crudo.csv.gz", DataFrame)
 
 `
 Con cd al directorio donde está el script de Julia (para ahorrarse el problema de los senderos relativos) ejecuté
