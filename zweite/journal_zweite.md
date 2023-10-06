@@ -17,6 +17,35 @@ Graficar score público vs predictedPositives
 - rank?
 
 
+## 2023-10-06
+
+### Búsqueda 
+- Para explorar hiperparámetros creo `523_lightgbm_binaria_BO_20231006_01.r` a partir de `523_lightgbm_binaria_BO.r`.
+- undersampling
+```
+PARAM$trainingstrategy$undersampling <- 0.1
+```
+- pandemia ASPO: elimino 2020-03 a 2020-11 inclusive, pero incluyo resto
+```
+PARAM$input$training <- c(
+  201901, 201902, 201903, 201904, 201905, 201906,
+  201907, 201908, 201909, 201910, 201911, 201912,
+  202001, 201902,
+  202012,
+  202101, 202102, 202103, 202104, 202105
+)
+```
+- Rango hiperparámetros  
+Veo de última optimización bayesiana los rangos en que oscilaron los valores en `lee_bayesiana.ipynb`, un cuaderno que ejecuta Julia
+```
+  makeNumericParam("learning_rate", lower = 0.01, upper = 0.15),
+  makeNumericParam("feature_fraction", lower = 0.4, upper = 0.8),
+```
+**ME ARREPIENTO**, son muy variables en mi corrida y spione muestra que valores que iba a descartar son útiles.
+- Hay que laburar features
+
+### Features
+
 
 
 ## 2023-10-04
@@ -24,7 +53,6 @@ Graficar score público vs predictedPositives
 ### Quitar meses pandemia entrenamiento
 - ¿Entrenamiento u optimización de hiperparámetros?
 
-- Para explorar hiperparámetros creo `523_lightgbm_binaria_BO_20231004_01.r` a partir de `523_lightgbm_binaria_BO.r`.
 - ASPO en CABA desde 2020-03-20 hasta 2020-11-09 [wikipedia | Medidas sanitarias por la pandemia de COVID-19 en Argentina](https://es.wikipedia.org/wiki/Medidas_sanitarias_por_la_pandemia_de_COVID-19_en_Argentina)
 
 

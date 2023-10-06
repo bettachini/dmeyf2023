@@ -35,17 +35,23 @@ options(error = function() {
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
 
-PARAM$experimento <- "HT5230"
+PARAM$experimento <- "HT5230_20230106_01"
 
 PARAM$input$dataset <- "./datasets/competencia_02.csv.gz"
 
- # los meses en los que vamos a entrenar
-PARAM$input$training <- c(202101, 202102, 202103, 202104, 202105)
+# los meses en los que vamos a entrenar
+# Todo menos ASPO 202003 a  202011 inclusive 
+PARAM$input$training <- c(
+#   201901, 201902, 201903, 201904, 201905, 201906,
+#   201907, 201908, 201909, 201910, 201911, 201912,
+#   202001, 201902,
+  202012,
+  202101, 202102, 202103, 202104, 202105
+)
 
 # un undersampling de 0.1  toma solo el 10% de los CONTINUA
-PARAM$trainingstrategy$undersampling <- 1.0
+PARAM$trainingstrategy$undersampling <- 0.1
 PARAM$trainingstrategy$semilla_azar <- 777787 # Aqui poner su  primer  semilla
-# PARAM$trainingstrategy$semilla_azar <- 102191 # Aqui poner su  primer  semilla
 
 PARAM$hyperparametertuning$iteraciones <- 100
 PARAM$hyperparametertuning$xval_folds <- 5
@@ -59,7 +65,9 @@ PARAM$hyperparametertuning$semilla_azar <- 274837
 
 # Aqui se cargan los bordes de los hiperparametros
 hs <- makeParamSet(
+  # makeNumericParam("learning_rate", lower = 0.01, upper = 0.15),
   makeNumericParam("learning_rate", lower = 0.01, upper = 0.3),
+  # makeNumericParam("feature_fraction", lower = 0.4, upper = 0.8),
   makeNumericParam("feature_fraction", lower = 0.2, upper = 1.0),
   makeIntegerParam("min_data_in_leaf", lower = 1L, upper = 8000L),
   makeIntegerParam("num_leaves", lower = 16L, upper = 1024L),
