@@ -35,7 +35,7 @@ options(error = function() {
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
 
-PARAM$experimento <- "HT5230_20230106_01"
+PARAM$experimento <- "HT5230_20230107"
 
 PARAM$input$dataset <- "./datasets/competencia_02.csv.gz"
 
@@ -284,6 +284,9 @@ for (meses_atras in list_meses_atras) {
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
+
+
+
 
 # creo la carpeta donde va el experimento
 dir.create("./exp/", showWarnings = FALSE)
