@@ -17,6 +17,83 @@ Graficar score público vs predictedPositives
 - rank?
 
 
+## 2023-10-07
+
+### 521_arboles_azarosos_20231007
+Hiperparametros por defecto
+```
+PARAM$rpart_param <- list(
+  "cp" = -1,
+  "minsplit" = 250,
+  "minbucket" = 100,
+  "maxdepth" = 14
+)
+```
+
+El feature engineering tardará mucho y no tiene sentido ningún dato previo a 202105-6 = 202011, por lo que elimino los registros anteriores en dataset
+```
+dataset <- dataset[foto_mes >= 202011]
+```
+
+Copio el feature engineering hasta ahora
+```
+#------------------------------------------------------------------------------
+# Feature Engineering
+#------------------------------------------------------------------------------
+
+# Saldo negativo
+## creates a column mcuentas_saldo_neg if mcuentas_saldo < 0
+dataset[, mcuentas_saldo_neg := mcuentas_saldo < 0]
+## idem. sum of other balances
+dataset[,
+  mcuentas_otras_neg :=
+    (mcuenta_corriente_adicional + mcuenta_corriente +
+     mcaja_ahorro + mcaja_ahorro_adicional + mcaja_ahorro_dolares) < 0
+]
+
+# abs sum como proxy actividad
+dataset[,
+  actividad := abs(matm_other) + abs(matm) +
+    abs(mcheques_emitidos_rechazados) + abs(mcheques_depositados_rechazados) +
+    abs(mcheques_emitidos) + abs(mcheques_depositados) +
+    abs(mextraccion_autoservicio) + abs(mautoservicio) +
+    abs(mtransferencias_emitidas) + abs(mtransferencias_recibidas) +
+    abs(mforex_sell) + abs(mforex_buy) +
+    abs(mpagomiscuentas) + abs(mpagodeservicios) +
+    abs(mttarjeta_master_debitos_automaticos) + abs(mttarjeta_visa_debitos_automaticos) +
+    abs(mcuenta_debitos_automaticos) + abs(mpayroll2) + abs(mpayroll) +
+    abs(minversion2) + abs(minversion1_pesos) + abs(minversion1_dolares) +
+    abs(mplazo_fijo_pesos) + abs(mplazo_fijo_dolares) +
+    abs(mprestamos_hipotecarios) + abs(mprestamos_prendarios) + abs(mprestamos_personales) +
+    abs(mtarjeta_master_consumo) + abs(mtarjeta_visa_consumo) +
+    abs(mcaja_ahorro_dolares) + abs(mcaja_ahorro_adicional) + abs(mcaja_ahorro) +
+    abs(mcuenta_corriente) + abs(mcuenta_corriente_adicional),
+  by = .(numero_de_cliente, foto_mes)
+]
+
+# lag de todo hasta un semestre
+setorder(dataset, numero_de_cliente, foto_mes)
+columns_to_shift <- names(dataset)[!names(dataset) %in% c("numero_de_cliente", "foto_mes", "clase_ternaria")]
+list_meses_atras <-  c(1, 2, 3, 4, 5, 6) # 202105 - 202011 = 7, un semestre fuera de ASPO posible
+for (meses_atras in list_meses_atras) {
+  columns_by_shift <- paste0(columns_to_shift, "_lag", meses_atras)
+  dataset[,
+    (columns_by_shift) := lapply(
+      .SD, function(x) shift(x, type = "lag", fill = NA, n = meses_atras)
+    ),
+    by = numero_de_cliente, .SDcols = columns_to_shift
+  ]
+}
+
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+```
+
+```
+
+
+
+
 ## 2023-10-06
 
 ### Búsqueda 

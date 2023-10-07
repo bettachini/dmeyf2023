@@ -51,7 +51,10 @@ PARAM$input$training <- c(201901, 201902, 201903) # unos tres por ahora
 
 # select multiple months
 dataset <- fread(PARAM$input$dataset)
-dataset3 <- dataset[,foto_mes %in% PARAM$input$training]
+max(dataset[, foto_mes])
+
+
+dataset3 <- dataset[foto_mes %in% PARAM$input$training, , ]
 nrow(dataset3)
 max(dataset3$foto_mes)
 # save dataset
@@ -122,3 +125,7 @@ sum_accounts <- dataset[,
   )
 ]
 
+
+
+## ---------------------------
+# new column in dataframe if mcuentas_saldo < 0
