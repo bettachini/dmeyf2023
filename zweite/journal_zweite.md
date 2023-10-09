@@ -17,7 +17,36 @@ Graficar score público vs predictedPositives
 - rank?
 
 
+
+## 2023-10-08
+
+### dataset con feature engineering
+- No puede ser que cada vez que ejecute genere nueva vez los features.  
+- Hay que guardarles en normanbuck y los tome de ahí
+- Copio de `523_lightgbm_binaria_BO_20231006_01.r` a `engineered_dataset.r`
+
+
+
 ## 2023-10-07
+
+### Envio 521_arboles_azarosos_20231007
+1. Descargo resultados de ejecucion 
+```
+gsutil -m cp -r   "gs://normanbuck/exp/KA5210"   ./KA5210_20231007
+```
+1. cd `./KA5210_20231007`
+1. Activa entorno Python donde con pip se instaló aplicación de Kaggle
+```
+source ~/bin/jupyter/bin/activate
+```
+1. Envia a Kaggle
+```
+kaggle competitions submit -c dmeyf-2023-segunda -f KA5210_001.csv -m "KA5210_001_20231007T1626Z-3"
+```
+Lo mismo con cada uno
+
+Todos los resultados tuvieron un puntaje menor que los anteriores intentos.
+
 
 ### 521_arboles_azarosos_20231007
 Hiperparametros por defecto
@@ -89,7 +118,6 @@ for (meses_atras in list_meses_atras) {
 #------------------------------------------------------------------------------
 ```
 
-```
 
 
 

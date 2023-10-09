@@ -1,0 +1,38 @@
+From noreply@zulip.rebelare.com Sun Oct  8 12:17:51 2023
+Date: Sun, 08 Oct 2023 15:17:46 -0000
+From: Zulip notifications <noreply@zulip.rebelare.com>
+To: Víctor Alexis Bettachini <bettachini@gmail.com>
+Subject: #cartelera > alternativa a 5-fold xval
+
+
+Gustavo Denicolay: @everyone
+
+ *  Hasta ahora realizábamos la optimización bayesiana de los hiperparámetros de
+    LightTGBM con 5-fold cross validation
+ * 
+
+    Está disponible una alternativa más rápida, entrenar en la union de varios
+    meses, utilizar otro mes para validar y finalmente otro mes para testear
+
+     +  en el repositorio oficial de la cátedra están estos dos nuevos scripts
+         o  src/lightgbm/z823_lightgbm_binaria_BO.r
+         o  src/lightgbm/z824_lightgbm_final.r
+ * 
+
+    Es de vital importancia que realicen Feature Engineering, agregar lags ( el
+    valor de la variable el mes anterior) a todas las variables aumenta en 20M
+    la ganancia
+
+     +  una de muchas páginashttps://personalpages.manchester.ac.uk/staff/david.selby/rthritis/2021-02-26-wr
+        angling/
+David Selby: Wrangling data the right way with R
+Tips on data manipulation with the packages data.table, dplyr and tidyr,
+including reshaping data, creating lagged variables and preparing data for
+survival analysis.
+—
+You are receiving this because everyone was mentioned in #cartelera.
+Reply in dmeyf2023 Zulip, or manage email preferences.
+
+Do not reply to this email. This Zulip server is not configured to accept
+incoming emails (help).
+
