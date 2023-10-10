@@ -12,10 +12,13 @@ dataset <- fread(PARAM$input$dataset)
 
 # Assuming you have already read your CSV data into a data.table called 'dataset'
 
+# Rename columns ending with "_d1" to "_l1"
+setnames(dataset, old = names(dataset)[grep("_d1$", names(dataset))], new = sub("_d1$", "_l1", names(dataset)[grep("_d1$", names(dataset))]))
 
-# Change column names based on your criteria
-setnames(dataset, old = grep("_d1$", names(dataset), value = TRUE), new = sub("_d1$", "_l1", grep("_d1$", names(dataset), value = TRUE)))
-setnames(dataset, old = grep("_d1:1$", names(dataset), value = TRUE), new = sub("_d1:1$", "_d1", grep("_d1:1$", names(dataset), value = TRUE)))
+# Rename columns ending with "_d1:1" to "_d1"
+setnames(dataset, old = names(dataset)[grep("_d1:1$", names(dataset))], new = sub("_d1:1$", "_d1", names(dataset)[grep("_d1:1$", names(dataset))]))
+
+
 
 names(dataset)
 
