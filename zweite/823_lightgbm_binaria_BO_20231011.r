@@ -281,17 +281,17 @@ EstimarGanancia_lightgbm <- function(x) {
 
 # Aqui se debe poner la carpeta de la computadora local
 # setwd("../normanbuck/") # Establezco el Working Directory
-# setwd("~/buckets/b1/") # Establezco el Working Directory
+setwd("~/buckets/b1/") # Establezco el Working Directory
 
 # cargo el dataset donde voy a entrenar el modelo
 dataset <- fread(PARAM$input$dataset)
 
 
-## Salvataje JSON
-# Rename features with special characters
-colnames(dataset) <- make.names(colnames(dataset))
-# Ensure feature names are valid JSON strings
-colnames(dataset) <- paste0('"', colnames(dataset), '"')
+# ## Salvataje JSON
+# # Rename features with special characters
+# colnames(dataset) <- make.names(colnames(dataset))
+# # Ensure feature names are valid JSON strings
+# colnames(dataset) <- paste0('"', colnames(dataset), '"')
 
 
 # creo la carpeta donde va el experimento
