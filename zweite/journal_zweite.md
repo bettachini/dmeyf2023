@@ -17,6 +17,37 @@ Graficar score público vs predictedPositives
 - rank?
 
 
+## 2023-10-11
+- Búsqueda de hiperparámetros 
+  - Tomo `src/lightgbm/dm823_lightgbm_binaria_BO.r` y lo ubico en`zweite/823_lightgbm_binaria_BO_20231011.r`
+  - Parámetros
+    - Archivos 
+    ```
+    PARAM$experimento <- "HT8230_20231011"
+    PARAM$input$dataset <- "./datasets/competencia_02_engineered_vm.csv.gz"
+    ```
+    - Semillas: primera y segunda  
+    - Meses por defecto
+    - hiperpámetros optimización bayesiana 
+    ```
+    PARAM$trainingstrategy$undersampling <- 0.1`
+    makeNumericParam("learning_rate", lower = 0.01, upper = 0.3),
+    makeNumericParam("feature_fraction", lower = 0.2, upper = 1.0),
+    makeIntegerParam("num_leaves", lower = 16L, upper = 1024L),
+    makeIntegerParam("min_data_in_leaf", lower = 100L, upper = 8000L)
+    makeIntegerParam("min_data_in_leaf", lower = 100L, upper = 50000L)
+    ```
+)
+
+## 2023-10-10
+
+### Features históricos
+- Hice modificaciones sobre el código SQL para DuckDB provisto por Alejando Bolaños [Zulip | ]() en `zweite/features_vm_20231019.ipynb`
+- Lo corrí en VM en Google
+  - Debí descomprimir el dataset en `~/buckets/b1/datasets/competencia_02.csv` pues no terminaba de cargarle de lo contrario
+  - La salida se aloja en `normanbuck/datasets/competencia_02_engineered_vm.csv.gz` (tuve que comprimirle luego)
+
+
 
 ## 2023-10-08
 
