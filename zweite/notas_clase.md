@@ -16,7 +16,7 @@
 - Modelo de explicabilidad (interpretación): Tras tener "puntos separados" lo que se compara el "perfilado"
   - sobre un par de variables se compara la población general (no solo los otros BAJA+2, sino todos) con la particular de ese cluster, y se hace hincapié en las diferencias
     - Para esto un gráfico de histogramas en función de una variable.
-    - sumarización
+    - sumarización (summarize de R)
     - box-plot
     - lo importante no es que se vea la distribución, sino identificar los indicadores de la distribución.
   - No olvidar el score para ver la "calidad" del cluster.
@@ -24,6 +24,9 @@
     - Ver la rentabilidad en cada grupo.
 - Descripción muy general (de hecho generalizamos)
   - Contar una historia con muy pocas cosas.
+- El video se sube a alguna plataforma y se pasa el enlace, no se envía por mail.
+- No dejar de re-leer [Zulip | 447-Miranda-Wintour](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/447-Miranda-Wintour)
+
 
 ## 2023-10-02
 
