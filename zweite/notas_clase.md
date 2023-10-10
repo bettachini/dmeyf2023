@@ -1,6 +1,30 @@
 # Notas de clases
 
 
+## 2023-10-09
+
+### Generación de features (repaso)
+- Inflación: actualizar valores monetarias
+
+
+### Clustering (repaso)
+- Modelo (obtiene patrones)
+  - estratégia 1 : modelo de explicabilidad (150 variables) -> algo más conectado con la clase (misma cantidad, pero la "calidad" es más linda)
+  e.g. UMAP (embedding)
+  - estratégia 2 :  distancia de random forests (RF) -> genera matriz -> UMAP -> las dimensiones que se quieran
+
+- Modelo de explicabilidad (interpretación): Tras tener "puntos separados" lo que se compara el "perfilado"
+  - sobre un par de variables se compara la población general (no solo los otros BAJA+2, sino todos) con la particular de ese cluster, y se hace hincapié en las diferencias
+    - Para esto un gráfico de histogramas en función de una variable.
+    - sumarización
+    - box-plot
+    - lo importante no es que se vea la distribución, sino identificar los indicadores de la distribución.
+  - No olvidar el score para ver la "calidad" del cluster.
+  - La __cuantificación es muy importante__ intentar dar porcentajes -> Poner números en pantalla o al menos mencionarles.
+    - Ver la rentabilidad en cada grupo.
+- Descripción muy general (de hecho generalizamos)
+  - Contar una historia con muy pocas cosas.
+
 ## 2023-10-02
 
 ## Interpretación de modelos (monday/z801 -> zweite/801_Sobre_Intepretabilidad.ipynb)
