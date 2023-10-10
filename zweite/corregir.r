@@ -14,8 +14,10 @@ dataset <- fread(PARAM$input$dataset)
 
 
 # Change column names based on your criteria
-setnames(dataset, old = grep("_d1$", names(dataset), value = TRUE), new = sub("_d1$", "_l1", grep("_d1$", names(dataset), value = TRUE))
-setnames(dat, old = grep("d1:1$", names(dataset), value = TRUE), new = sub("d1:1$", "d1", grep("d1:1$", names(dataset), value = TRUE)))
+setnames(dataset, old = grep("_d1$", names(dataset), value = TRUE), new = sub("_d1$", "_l1", grep("_d1$", names(dataset), value = TRUE)))
+setnames(dataset, old = grep("_d1:1$", names(dataset), value = TRUE), new = sub("_d1:1$", "_d1", grep("_d1:1$", names(dataset), value = TRUE)))
+
+names(dataset)
 
 # save dataset
 fwrite(dataset, file="./datasets/competencia_02_eng.csv.gz", compress="gzip")
