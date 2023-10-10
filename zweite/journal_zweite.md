@@ -18,7 +18,16 @@ Graficar score público vs predictedPositives
 
 
 ## 2023-10-11
-- Búsqueda de hiperparámetros 
+
+
+
+### Búsqueda de hiperparámetros
+Falló miserablemente correr en VM, probaré local.
+- Previo tengo que bajar el dataset
+`gsutil -m cp -r gs://normanbuck/datasets/competencia_02_engineered_vm.csv.gz ./`
+
+
+- Corrida en VM
   - Tomo `src/lightgbm/dm823_lightgbm_binaria_BO.r` y lo ubico en`zweite/823_lightgbm_binaria_BO_20231011.r`
   - Parámetros
     - Archivos 

@@ -10,6 +10,9 @@ rm(list = ls()) # remove all objects
 gc() # garbage collection
 
 require("data.table")
+if (!require("rlist")) {
+  install.packages("rlist")
+}
 require("rlist")
 
 require("lightgbm")
@@ -277,6 +280,7 @@ EstimarGanancia_lightgbm <- function(x) {
 # Aqui empieza el programa
 
 # Aqui se debe poner la carpeta de la computadora local
+# setwd("../normanbuck/") # Establezco el Working Directory
 setwd("~/buckets/b1/") # Establezco el Working Directory
 
 # cargo el dataset donde voy a entrenar el modelo
