@@ -22,9 +22,14 @@ Graficar score público vs predictedPositives
 
 
 ### Búsqueda de hiperparámetros
-Falló miserablemente correr en VM, probaré local.
-- Previo tengo que bajar el dataset
-`gsutil -m cp -r gs://normanbuck/datasets/competencia_02_engineered_vm.csv.gz ./`
+Falló miserablemente correr en VM
+- Corrí en RStudio en la VM
+  - Parece que no le gusta cierta feature name (no soporta JSON special characters)
+  - Tengo que revisar el código que genera los features
+
+- Probaré local -> Imposible por el tamaño del archivo
+  - Previo tengo que bajar el dataset
+  `gsutil -m cp -r gs://normanbuck/datasets/competencia_02_engineered_vm.csv.gz ./`
 
 
 - Corrida en VM
