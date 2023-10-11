@@ -19,8 +19,12 @@ setnames(dataset, old = names(dataset)[grep("_d1$", names(dataset))], new = sub(
 setnames(dataset, old = names(dataset)[grep("_d1:1$", names(dataset))], new = sub("_d1:1$", "_d1", names(dataset)[grep("_d1:1$", names(dataset))]))
 
 
-
 names(dataset)
 
 # save dataset
 fwrite(dataset, file="./datasets/competencia_02_eng.csv.gz", compress="gzip")
+
+
+# test
+dataset2 <- fread("./datasets/competencia_02_eng.csv.gz")
+names(dataset2)
