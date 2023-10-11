@@ -14,15 +14,16 @@ require("lightgbm")
 # defino los parametros de la corrida, en una lista, la variable global  PARAM
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
-PARAM$experimento <- "KA8240"
+PARAM$experimento <- "KA8240_20231011"
 
-PARAM$input$dataset <- "./datasets/competencia_02.csv.gz"
+PARAM$input$dataset <- "./datasets/competencia_02_eng.csv.gz" # actualizo a último engineered
 
 # meses donde se entrena el modelo
-PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105)
+PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105) # post-pandemia
+# PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105) # por defecto
 PARAM$input$future <- c(202107) # meses donde se aplica el modelo
 
-PARAM$finalmodel$semilla <- 102191
+PARAM$finalmodel$semilla <- 674831
 
 # hiperparametros intencionalmente NO optimos
 PARAM$finalmodel$optim$num_iterations <- 730
