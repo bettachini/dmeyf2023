@@ -23,7 +23,7 @@ Graficar score público vs predictedPositives
 
 
 ### Entrenamiento y predicción
-- Ajustes `824_lightgbm_final_20231011_01.r`
+1. Ajustes `824_lightgbm_final_20231011_01.r`
 ```
 PARAM$experimento <- "KA8240_20231011_01"
 
@@ -43,7 +43,13 @@ PARAM$finalmodel$optim$feature_fraction <- 0.503874
 PARAM$finalmodel$optim$min_data_in_leaf <- 3713
 PARAM$finalmodel$optim$num_leaves <- 672
 ```
-
+1. Tras ejecutar se borró la instancia VM!
+1. Copié resultados de `normanbuck/exp/KA8240_20231011_01`
+1. Envío a Kaggle
+```
+kaggle competitions submit -c dmeyf-2023-segunda -f <cada>.csv -m "<cada>"
+```
+1. Ninguno resultó en una mejora.
 
 
 ## 2023-10-10
