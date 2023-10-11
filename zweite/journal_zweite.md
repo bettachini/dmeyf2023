@@ -18,7 +18,35 @@ Graficar score público vs predictedPositives
 
 
 ## 2023-10-11
+### Hiperparámetros
+- Finalmente pude correr la optimización bayesiana en la VM.
 
+
+### Entrenamiento y predicción
+- Ajustes `824_lightgbm_final_20231011_01.r`
+```
+PARAM$experimento <- "KA8240_20231011_01"
+
+PARAM$input$dataset <- "./datasets/competencia_02_eng.csv.gz" # actualizo a último engineered
+
+# meses donde se entrena el modelo
+PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105) # post-pandemia
+# PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105) # por defecto
+PARAM$input$future <- c(202107) # meses donde se aplica el modelo
+
+PARAM$finalmodel$semilla <- 674831
+
+# hiperparametros intencionalmente NO optimos
+PARAM$finalmodel$optim$num_iterations <- 113
+PARAM$finalmodel$optim$learning_rate <- 0.207090
+PARAM$finalmodel$optim$feature_fraction <- 0.503874
+PARAM$finalmodel$optim$min_data_in_leaf <- 3713
+PARAM$finalmodel$optim$num_leaves <- 672
+```
+
+
+
+## 2023-10-10
 
 
 ### Búsqueda de hiperparámetros
@@ -53,7 +81,7 @@ Falló miserablemente correr en VM
     ```
 )
 
-## 2023-10-10
+## 2023-10-09
 
 ### Features históricos
 - Hice modificaciones sobre el código SQL para DuckDB provisto por Alejando Bolaños [Zulip | ]() en `zweite/features_vm_20231019.ipynb`
