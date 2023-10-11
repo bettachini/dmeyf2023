@@ -1,6 +1,7 @@
 # Notas para el video de Miranda
 
 ## ¿Cómo se hace lo del clustering?
+`801_Sobre_Interpretabilidad.ipynb`
 
 
 

@@ -2,19 +2,28 @@
 
 ## Pendientes
 
-### **Pendiente** Features históricos
-[Zulip | Instrucciones de Alejandro Bolaños para generarles en SQL](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/401-Code/topic/.5Btip.5D.20features.20historicos.20usando.20SQL)
+### **Pendiente** Calidad de datos y NAs
 
-### **Pendiente** Meseta
-Graficar score público vs predictedPositives 
+`505_graficar_zero_rate.r` -> gráficos en `bucket/exp/CA5050`
+
 
 ### **Pendiente** Cantidad de envíos
-?
 [Zulip | cantidad de envíos](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/430-Kaggle-02/topic/cantidad.20de.20env.C3.ADos)
+¿Qué son la cantida de envíos?
 
-### **Pendiente** Revisar bibliografía:
-- Lags?
+### **Pendiente** Drifting
+[Zulip | Drifting](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/430-Kaggle-02/topic/Drifting)
 - rank?
+
+
+## Recursos 
+### Features históricos
+[Zulip | Instrucciones de Alejandro Bolaños para generarles en SQL](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/401-Code/topic/.5Btip.5D.20features.20historicos.20usando.20SQL)
+
+### Meseta
+Graficar score público vs predictedPositives 
+
+
 
 
 ## 2023-10-11
