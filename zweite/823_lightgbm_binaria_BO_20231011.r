@@ -55,7 +55,7 @@ PARAM$hyperparametertuning$POS_ganancia <- 273000
 PARAM$hyperparametertuning$NEG_ganancia <- -7000
 
 # Aqui poner su segunda semilla
-PARAM$hyperparametertuning$semilla_azar <- 274837
+PARAM$lgb_semilla <- 274837
 #PARAM$lgb_semilla <- 200177
 #------------------------------------------------------------------------------
 
