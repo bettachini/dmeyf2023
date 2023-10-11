@@ -1,8 +1,12 @@
 # Notas para el video de Miranda
 
-## ¿Quién es?
-Miranda Wintour ... es la directora de Marketing del banco.
+## ¿Cómo se hace lo del clustering?
 
+
+
+## ¿Quienes?
+- Miranda Wintour ... es la directora de Marketing del banco.
+- Ich: pinche del área de datos, una dirección que depende de la gerencia de Miranda
 
 ## Video
 
@@ -18,6 +22,8 @@ Miranda Wintour ... es la directora de Marketing del banco.
 
 - Beneficio
   - ?
+
+- ¿Qué son las cantidad de estímulos enviados?
 
 ### Estudio
 - Buscamos tener indicadores dos meses previos a que un cliente se dará de baja

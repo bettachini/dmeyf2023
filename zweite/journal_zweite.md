@@ -51,6 +51,40 @@ kaggle competitions submit -c dmeyf-2023-segunda -f <cada>.csv -m "<cada>"
 ```
 1. Ninguno resultó en una mejora.
 
+1. Ajustes `824_lightgbm_final_20231011_02.r`
+```
+# meses donde se entrena el modelo
+PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105) # post-pandemia
+# PARAM$input$training <- c(202012, 202101, 202102, 202103, 202104, 202105) # por defecto
+PARAM$input$future <- c(202107) # meses donde se aplica el modelo
+
+PARAM$finalmodel$semilla <- 674831
+
+# hiperparametros intencionalmente NO optimos
+PARAM$finalmodel$optim$num_iterations <- 1111
+PARAM$finalmodel$optim$learning_rate <-  0.049542
+PARAM$finalmodel$optim$feature_fraction <- 0.953335
+PARAM$finalmodel$optim$min_data_in_leaf <- 7585
+PARAM$finalmodel$optim$num_leaves <- 777
+```
+1. Creo instancia a partir de la plantilla `temp-08vcpu-032ram` 
+1. No pude subir todos los resultados a Kaggle por la limitación de 20 diarios.
+  - Faltan
+```
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:13 KA8240_20231011_02_10000.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:13 KA8240_20231011_02_10500.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_11000.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_11500.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_12000.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_12500.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_13000.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_13500.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:13 KA8240_20231011_02_14000.csv
+-rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_14500.csv
+```
+1. Mejor puntaje `KA8240_20231011_02_15000.csv  Score: 140.21172`
+
+
 
 ## 2023-10-10
 
