@@ -1,5 +1,14 @@
 # Journal
 
+## Como debiera haber sido
+1. Calidad de datos: correción de ceros, NaNs y otras yerbas.
+1. Feature engineering
+3. Optimización de hiperparámetros
+4. Entrenamiento
+5. Predicción
+6. Envío a Kaggle
+
+
 ## Pendientes
 
 ### **Pendiente** Calidad de datos y NAs
@@ -22,6 +31,15 @@
 
 ### Meseta
 Graficar score público vs predictedPositives 
+
+
+
+
+## 2023-10-12
+
+### 
+
+1. Mejor puntaje `KA8240_20231011_02_12500.csv  Score: 154.07189`
 
 
 
@@ -60,6 +78,15 @@ kaggle competitions submit -c dmeyf-2023-segunda -f <cada>.csv -m "<cada>"
 ```
 1. Ninguno resultó en una mejora.
 
+
+
+#### Otro con un score un poco mejor en el Bayesiano
+1. El anterior se hizo con la entrada 65 de la optimización Bayesiana. Tomo ahora la entrada 62 que presenta en primer lugar un número bastante mayor de iteraciones.
+```
+	num_iterations	learning_rate	feature_fraction	num_leaves	min_data_in_leaf	ganancia
+61	279	0.269456	0.338450	270	6442	7.669956e+07
+62	1111	0.049542	0.953335	777	7585	7.699461e+07
+```
 1. Ajustes `824_lightgbm_final_20231011_02.r`
 ```
 # meses donde se entrena el modelo
@@ -78,19 +105,6 @@ PARAM$finalmodel$optim$num_leaves <- 777
 ```
 1. Creo instancia a partir de la plantilla `temp-08vcpu-032ram` 
 1. No pude subir todos los resultados a Kaggle por la limitación de 20 diarios.
-  - Faltan
-```
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:13 KA8240_20231011_02_10000.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:13 KA8240_20231011_02_10500.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_11000.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_11500.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_12000.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_12500.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_13000.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_13500.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:13 KA8240_20231011_02_14000.csv
--rw-r--r-- 1 vbettachini vbettachini 1876308 Oct 11 09:14 KA8240_20231011_02_14500.csv
-```
 1. Mejor puntaje `KA8240_20231011_02_15000.csv  Score: 140.21172`
 
 
