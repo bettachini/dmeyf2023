@@ -35,9 +35,17 @@ Graficar score público vs predictedPositives
 
 
 
+
+## 2023-10-13
+
+### Empezar Miranda
+1. Actualicé `801_Sobre_Interpretabilidad.ipynb` para que lea con pickle a partir de lo generado por `801_aux.ipynb` a correr en la VM
+1.
+
+
 ## 2023-10-12
 
-### 
+### Subí los restantes de la última corrida 
 
 1. Mejor puntaje `KA8240_20231011_02_12500.csv  Score: 154.07189`
 
