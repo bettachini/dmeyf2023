@@ -40,7 +40,14 @@ Graficar score público vs predictedPositives
 
 ### Empezar Miranda
 1. Actualicé `801_Sobre_Interpretabilidad.ipynb` para que lea con pickle a partir de lo generado por `801_aux.ipynb` a correr en la VM
-1.
+1. Todo falló
+1. Lo terminé corriendo en una VM de 256 GB con el script `801_sale.ipynb` que guardó en normanbuck varias salidas. La dejé suspendida.
+1. Intentaré escribir algo que me permite trabajar local con esas salidas. Copio `801_sale.ipynb` en `801_local.ipynb`
+1. Traigo los archivos generados.
+  1. ds_bajas
+  1. lgbm_importancia
+  1. shap_bajas
+1. shap_values hay que generarle localmente
 
 
 ## 2023-10-12
