@@ -1,5 +1,13 @@
 # Notas para el video de Miranda
 
+## Parla
+Estimada Wintour, le habla Bettachini del equipo de datos.
+
+
+? Objetivo: Para los clientes premium buscamos indicadores que anticipen su intención de dejar de ser clientes de esa cartera.
+
+
+
 ## ¿Cómo se hace lo del clustering?
 `801_Sobre_Interpretabilidad.ipynb`
 
@@ -21,10 +29,13 @@
     - durante meses 12
   - 10k * 7k * 12 = 840M$
 
-- Beneficio
-  - ?
+- La pérdida por cliente perdido es de 560000, pero como la probabilidad de perderle sin estímulo es de 0.5, la pérdida esperada es de 280000
+  - Si se va a pesar del estímulo de 7000 se pierde 7000
+  - Si se queda gracias al estímulo de la ganancia potencial de 280000, pero aún se pierden 7000 del estímulo, por lo que la ganancia es 273000 
 
 - ¿Qué son las cantidad de estímulos enviados?
+  
+
 
 ### Estudio
 - Buscamos tener indicadores dos meses previos a que un cliente se dará de baja
