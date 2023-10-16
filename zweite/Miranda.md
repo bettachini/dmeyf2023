@@ -3,11 +3,13 @@
 ## Parla
 Estimada Wintour, le habla Bettachini del Equipo de Datos.
 
-Su dirección comercial nos ha solicitado un estudio de la cartera de clientes premium a los que se plantea enviarles incentivos para desincentivar su baja.
-Estimar como maximizar la ganancia que reportaría tal acción requirió calcular la probabilidad de baja dos meses en el futuro para cada cliente. 
-Lo hicimos entrenando un modelo con indicadores que generamos a partir de datos históricos.
+Su dirección comercial nos solicitó un estudio de la cartera de clientes premium.
+Es objetivo es determinar a cuales enviarles incentivos para desincentivar su baja.
+Maximizar la ganancia que reportaría tal acción requirió calcular para cada cliente la probabilidad de baja dos meses en el futuro. 
+Partiendo de datos históricos generamos indicadores con los que entrenamos un modelo numérico.
 Logrgamos así identificar cuales de estos indicadores advierten de futuras bajas de clientes individuales.
-En video resumo nuestra caracterización de algunas agrupaciones que nuestro modelo puede hacer del comportamiento de estos clientes.
+En este video no comentaré del modelo en si.
+Daré una síntesis de los indicadores de comportamiento de los grupos con mayor probabilidad de baja que nuestro modelo identifica.
 
 Para identificar cuales indicadores sobresalen en cada grupo es necesario tener presentes cuales preanuncian bajas en el conjunto de la cartera.
 Ninguno sale de lo que podían suponerse a priori, lo que incrementó nuestra confianza en las predicciones que el modelo puede hacer para casos particulares.
@@ -23,7 +25,7 @@ Como dije, esto se aplica al conjunto de la cartera.
 
 Paso ahora a individualizar grupos de clientes.
 Explicaré que indicadores resaltan por los que se aplican al conjunto de la cartera.
-Lo haré para los tres grupos que presentan la mayor probabilidad de baja dos meses a posteriori del análisis que realiza nuestro modelo.
+Lo haré para los tres grupos que nuestro modelo muestra con una probabilidad de baja dos meses en el futuro superior al 30%.
 
 El grupo con mayor probabilidad de baja, un 48%, destaca por
 - el elevado monto de prestamos personales
@@ -32,7 +34,7 @@ Siendo los prestamos personales los de mayor tasa y que el banco está obteniend
 Para identificarles a cuales clientes dirigir este esfuerzo sugiero emplear el modelo producido por nuestro equipo de datos.
 Este ofrece una antelación suficiente para realizar la correspondiente campaña. 
 
-En el segundo grupo, con probabilidad de baja del 43%, no se destacan indicadores para esta pero si de continuidad, como
+En el segundo grupo, con probabilidad de baja del 43%, no se destacan indicadores de baja particulares de este grupo pero si de continuidad, como
 - si se les condedió un acuerdo de descubierto
 - montos de consumo con tarjetas de crédito.
 Evidentemente a estos clientes les interesa el crédito, pero no a través de prestamos, por lo que ofrecerles líneas de crédito adicionales puede ser una forma de retenerles.
@@ -46,8 +48,8 @@ y todo esto a pesar de contar con acuerdos de descubierto.
 Estos serían clientes que ya han decidido darse de baja y no hay nada que podamos hacer para evitarlo.
 
 
-
-En nombre del Equipo de Datos reitero nuestro interés en trabajar con la Dirección Comercial con el fin de poner a su servicio el modelo que entrenamos.
+Este fue un somero análisis de lo que nuestro modelo nos permitió aprender de la cartera premium.
+En nombre del Equipo de Datos reitero nuestro interés en trabajar con la Dirección Comercial con el fin de ponerle a su servicio.
 Hasta pronto.
 
 
