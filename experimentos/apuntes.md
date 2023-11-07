@@ -3,6 +3,33 @@
 Código `dritte/ternaire.jl` de Juan Raman con agregado de Federico Idoeta.  
 
 
+## Clase plenaria Denicolay
+20231102 (resumen)
+
+### Semillerío
+El modelo debe
+- hacerse con semillerío, un centenar (125) de corridas con semillas distintas
+    - Esto para el modelo final, no para la optimización
+    - Promediar la salida, es decir, votar por mayoría entre continua y alternativa
+- Meses: una decena, sino un año
+- Feature engineering: con ganas
+- Quality & drifting: limpieza y corrección por inflación de datos primarios
+- No dejar de hacer optimización Bayesiana, que puede hacerse sobre una sola semilla
+
+- Para el análisis de los experimentos
+- Utilizar los resultados del semillerío medidos sobre test
+    - Histograma de ganancias no del centenar de semillas, sino de una submuestra
+    - Se comparan contra la distribución del baseline (modelo malo)
+    - El objetivo es mostrar que hay una distribución (modelo que se supone una mejora) separable de aquella del del baseline
+
+
+### Espacio para optimización Bayesiana
+Estos son valores medios que dió Bolaños. Si no tengo otro mejor obtenido por optimización, usarle.
+- min data in leaf: 40 a 5000
+- feature fraction: 0.2 a 0.8
+- min leaves = 15 a 300
+
+
 
 ## Baseline
 [2023-11-03 Bolaños](https://dmeyf2023.zulip.rebelare.com/#narrow/stream/435-Experimentos-Colaborativos/topic/Baseline.20-.20Modelo.20colaborativo.20final)  
@@ -11,9 +38,16 @@ Código `dritte/ternaire.jl` de Juan Raman con agregado de Federico Idoeta.
 > Sin undersampling.
 > Agregar las variables Lags 1, 3 y 6 
 
+
+### Optimización Bayesiana
+No tendría sentido "quemar" el mes de test que se usará con el modelo final al momento de optimizar hiperparámetros.
+Entonces sería más razonable usar 202106 como test.
+
+
 ## Enlaces
 - [ Nuestra Presentación | Google Docs](https://docs.google.com/presentation/d/10rIRzFYEmKURCz5yBybp4ohgJqjXpc4H8l5JDIgfYC4/edit?usp=sharing)
 - [Cohorte B | Google Docs](https://docs.google.com/presentation/d/1ptfmnzmqtBhAam7DEDT-a4HcHWIHroYqhF5cuA3lrsI/edit)
+
 
 ## Bibliografía
 Ver zotero
