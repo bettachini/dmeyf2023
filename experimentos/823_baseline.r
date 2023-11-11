@@ -37,7 +37,7 @@ PARAM <- list()
 
 PARAM$experimento <- "exp823_a"
 
-PARAM$input$dataset <- "./bucket/b1/datasets/competencia_03_baseline.csv.gz"
+PARAM$input$dataset <- "./datasets/competencia_03_baseline.csv.gz"
 
 # los meses en los que vamos a entrenar
 #  mucha magia emerger de esta eleccion
