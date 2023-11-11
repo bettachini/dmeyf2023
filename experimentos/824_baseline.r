@@ -14,7 +14,7 @@ require("lightgbm")
 # defino los parametros de la corrida, en una lista, la variable global  PARAM
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
-PARAM$experimento <- "exp824_baseline"
+PARAM$experimento <- "exp_baseline_824"
 
 PARAM$input$dataset <- "./datasets/competencia_03_baseline.csv.gz"
 
@@ -97,7 +97,7 @@ dtrain <- lgb.Dataset(
 # genero el modelo
 
 ##  Un modelo por semilla
-for (i in 1:20) {
+for (i in 1:length(semillerio)) {
   PARAM$finalmodel$semilla <- semillerio[i]
   
   # hiperparametros según corrida de 823_baseline.r
@@ -206,7 +206,7 @@ for (i in 1:20) {
       ~semilla,
       ~ganancia,
       ~envios,
-      semillas[i],
+      semillerio[i],
       sum(tb_ganancias$gan),
       envios
     )
