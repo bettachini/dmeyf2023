@@ -1,4 +1,56 @@
 
+##  2023-11-11
+
+### Tengo que: hacer dataset con mi feature engineering
+
+### Tengo que: correr 824 para los parámetros que salen
+
+### Baseline: optimización bayesiana
+823_baseline.r 
+
+Fechas y semillas
+```{r}
+PARAM$experimento <- "exp823_a"
+
+PARAM$input$dataset <- "./datasets/competencia_03_baseline.csv.gz"
+
+# los meses en los que vamos a entrenar
+#  mucha magia emerger de esta eleccion
+PARAM$input$testing <- c(202106)
+PARAM$input$validation <- c(202105)
+PARAM$input$training <- c(2020111, 202012, 202101, 202102, 202103, 202104)
+
+# un undersampling de 0.1  toma solo el 10% de los CONTINUA
+PARAM$trainingstrategy$undersampling <- 1.0 # sin undersampling
+PARAM$trainingstrategy$semilla_azar <- 777787 # Aqui poner su primer semilla
+
+PARAM$hyperparametertuning$POS_ganancia <- 273000
+PARAM$hyperparametertuning$NEG_ganancia <- -7000
+
+# Aqui poner su segunda semilla
+PARAM$lgb_semilla <- 274837
+```
+
+Rango de parámetros
+```{r}
+PARAM$bo_lgb <- makeParamSet(
+  makeNumericParam("learning_rate", lower = 0.06, upper = 0.1),
+  makeNumericParam("feature_fraction", lower = 0.03, upper = 0.07),
+  makeIntegerParam("num_leaves", lower = 200L, upper = 350L),
+  makeIntegerParam("min_data_in_leaf", lower = 1200L, upper = 1800L)
+)
+```
+
+### Generación baseline
+`sql_eng_baseline.ipynb`
+- SQL via DuckDB en Python
+- a partir de `competencia_03_crudo.csv.gz` 
+- generó el dataset `competencia_03_baseline.csv.gz` que se usó en el experimento 823.
+
+Agrega atributos
+- `clase_ternaria`
+- features de lag 1, 3 y 6 meses para todos los atributos de la base (excepto `numero_de_cliente`, `foto_mes` y `clase_ternaria`)
+
 ## Clase ternaria
 Código `dritte/ternaire.jl` de Juan Raman con agregado de Federico Idoeta.  
 
