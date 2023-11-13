@@ -10,8 +10,21 @@ gsutil -m cp -r \
   .
 ```
 
-#### Corridas rápidas
-- Creo VM 8/256 `all6`
+#### Corridas rápidas con VM 8/256
+- Corro `824_all6_zweite.r` con parámetros iteración 18 de `823_all6.r`
+  - quito semillas BO
+```
+  # hiperparametros según corrida de 823_all6.r iteración 18
+  PARAM$finalmodel$optim$learning_rate <- 0.0761611024567367
+  PARAM$finalmodel$optim$feature_fraction <- 0.0556126596160683
+  PARAM$finalmodel$optim$num_leaves <- 218
+  PARAM$finalmodel$optim$min_data_in_leaf <- 1231
+  envios_opt <- 14148
+  PARAM$finalmodel$optim$num_iterations <- 100 #ick!
+```
+
+
+
 - Corro `824_all6_erste.r` con parámetros iteración 15 de `823_all6.r`
 Número de iteraciones ultra corto
 ```
