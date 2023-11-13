@@ -11,7 +11,7 @@ gsutil -m cp -r \
 ```
 
 #### Corridas rápidas
-- `824_all6_erste.r` con parámetros iteración 13 de `823_all6.r`
+- `824_all6_erste.r` con parámetros iteración 15 de `823_all6.r`
 Número de iteraciones ultra corto
 ```
   PARAM$experimento <- "exp_all6_erste_824"
@@ -22,7 +22,8 @@ Número de iteraciones ultra corto
   envios_opt <- 12169
   PARAM$finalmodel$optim$num_iterations <- 13 #ick!
 ```
-
+- Creo VM 8/64 `all6`
+- 
 
 
 ### Actualización presentación
