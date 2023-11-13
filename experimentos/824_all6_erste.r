@@ -14,7 +14,7 @@ require("lightgbm")
 # defino los parametros de la corrida, en una lista, la variable global  PARAM
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
-PARAM$experimento <- "exp_all6_824"
+PARAM$experimento <- "exp_all6_erste_824"
 
 PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 
@@ -101,12 +101,12 @@ for (i in 1:length(semillerio)) {
   PARAM$finalmodel$semilla <- semillerio[i]
   
   # hiperparametros según corrida de 823_baseline.r
-  PARAM$finalmodel$optim$learning_rate <- 0.0601991051953877
-  PARAM$finalmodel$optim$feature_fraction <- 0.0688832312114146
-  PARAM$finalmodel$optim$num_leaves <- 294
-  PARAM$finalmodel$optim$min_data_in_leaf <- 1778
-  envios_opt <- 12470
-  PARAM$finalmodel$optim$num_iterations <- 285 #ick!
+  PARAM$finalmodel$optim$learning_rate <- 0.0910927315056324
+  PARAM$finalmodel$optim$feature_fraction <- 0.0622287783166394
+  PARAM$finalmodel$optim$num_leaves <- 326
+  PARAM$finalmodel$optim$min_data_in_leaf <- 1221
+  envios_opt <- 12169
+  PARAM$finalmodel$optim$num_iterations <- 13 #ick!
   
   # Hiperparametros FIJOS de  lightgbm
   PARAM$finalmodel$lgb_basicos <- list(

@@ -1,4 +1,95 @@
 
+##  2023-11-13
+
+### Ganancia vs semilla: inicio corrida lightgbm
+Sin haber terminado la ejecución de la optimización bayesiana `823_all6.r` y `823_all6_a.r` (ver más abajo), copio en directorio local sus parciales
+```
+gsutil -m cp -r \
+  "gs://normanbuck/exp/exp823_all6" \
+  "gs://normanbuck/exp/exp823_all6_a" \
+  .
+```
+
+#### Corridas rápidas
+- `824_all6_erste.r` con parámetros iteración 13 de `823_all6.r`
+Número de iteraciones ultra corto
+```
+  PARAM$experimento <- "exp_all6_erste_824"
+  PARAM$finalmodel$optim$learning_rate <- 0.0910927315056324
+  PARAM$finalmodel$optim$feature_fraction <- 0.0622287783166394
+  PARAM$finalmodel$optim$num_leaves <- 326
+  PARAM$finalmodel$optim$min_data_in_leaf <- 1221
+  envios_opt <- 12169
+  PARAM$finalmodel$optim$num_iterations <- 13 #ick!
+```
+
+
+
+### Actualización presentación
+Escribo sobre #5 FE histórico tanto en 
+- Presentación: https://docs.google.com/presentation/d/1ptfmnzmqtBhAam7DEDT-a4HcHWIHroYqhF5cuA3lrsI/edit#slide=id.g1eb3ec8d83d_1_18
+- Zulip: https://dmeyf2023.zulip.rebelare.com/#narrow/stream/435-Experimentos-Colaborativos/topic/FE.20hist.C3.B3rico
+
+Retiro la bibliografía actual
+```
+https://towardsdatascience.com/4-tips-for-advanced-feature-engineering-and-preprocessing-ec11575c09ea
+https://towardsdatascience.com/three-approaches-to-feature-engineering-for-time-series-2123069567be
+https://shaz13.medium.com/rare-feature-engineering-techniques-for-machine-learning-competitions-de36c7bb418f
+Feature Engineering for Machine Learning (1/3) | by Wing Poon | Towards Data Science
+Feature Engineering for Machine Learning (2/3) | by Wing Poon | Towards Data Science
+https://www.analyticsvidhya.com/blog/2019/12/6-powerful-feature-engineering-techniques-time-series/#h-feature-engineering-for-time-series-3-lag-features
+A Dynamic Classification Approach to Churn Prediction in Banking Industry (https://core.ac.uk/download/pdf/326836343.pdf)
+```
+
+
+### 
+
+
+##  2023-11-12
+
+### Optimización bayesiana: inicio de corrida
+- `823_baseline.r` baseline (terminada fecha anterior)
+
+Usando los mismos rangos para los parámetros que para el baseline (puedo haber subestimado la complejidad, estaría bueno contabilizar el número de atributos generados en los casos)
+- `823_all6.r` variante 1 sin normalización
+- `823_all6_a.r` con normalización
+
+
+### feature engineering
+`sql_eng_all6.ipynb` produce con SQL.
+
+Cambios comunes
+- Redundantes
+  - Tanto `Visa_mconsumospesos` y `Visa_mconsumototal` como `Master_mconsumospesos` y `Master_mconsumototal` son equivalentes. -> drop `Visa_mconsumospesos` y `Master_mconsumospesos`
+  - Son iguales la suma de `catm_trx` y `catm_trx_other` que `cextraccion_autoservicio` -> drop `cextraccion_autoservicio` 
+- Indicadores booleanos
+  - saldo negativo: `mcuentas_saldo_neg` = mcuentas_saldo < 0
+  - saldo negativo todas: `mcuenta_otras_neg` = (mcuenta_corriente + mcuenta_corriente_adicional + mcaja_ahorro + mcaja_ahorro_adicional + mcaja_ahorro_dolares) < 0 
+  - Uso de ATM de otro banco más que el propio: `catm_mayor_oth` = (catm_trx_other - catm_trx) < 0
+- Coalesce tarjetas de crédito
+  - consumo conjunto: mtarjeta_consumo = mtarjeta_master_consumo + mtarjeta_visa_consumo -> drop `mtarjeta_master_consumo` y `mtarjeta_visa_consumo`
+- Proxy actividad
+  - actividad = abs(matm_other) + abs(matm) +
+    abs(mcheques_emitidos_rechazados) + abs(mcheques_depositados_rechazados) +
+    abs(mcheques_emitidos) + abs(mcheques_depositados) +
+    abs(mextraccion_autoservicio) + abs(mautoservicio) +
+    abs(mtransferencias_emitidas) + abs(mtransferencias_recibidas) +
+    abs(mforex_sell) + abs(mforex_buy) +
+    abs(mpagomiscuentas) + abs(mpagodeservicios) +
+    abs(mttarjeta_master_debitos_automaticos) + abs(mttarjeta_visa_debitos_automaticos) +
+    abs(mcuenta_debitos_automaticos) + abs(mpayroll2) + abs(mpayroll) +
+    abs(minversion2) + abs(minversion1_pesos) + abs(minversion1_dolares) +
+    abs(mplazo_fijo_pesos) + abs(mplazo_fijo_dolares) +
+    abs(mprestamos_hipotecarios) + abs(mprestamos_prendarios) + abs(mprestamos_personales) +
+    abs(mtarjeta_consumo) + 
+    abs(mcaja_ahorro_dolares) + abs(mcaja_ahorro_adicional) + abs(mcaja_ahorro) +
+    abs(mcuenta_corriente) + abs(mcuenta_corriente_adicional)
+
+Con dos variantes
+1. **all6**: min, max, promedio, lag# con # 1 a 6
+2. **all6_a**: + normalización (col/ promedio), diferencia normalizada ((col - lag#)/ promedio)
+
+
 ##  2023-11-11
 
 ### Tengo que: hacer dataset con mi feature engineering
