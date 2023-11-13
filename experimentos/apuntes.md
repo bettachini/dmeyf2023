@@ -11,20 +11,31 @@ gsutil -m cp -r \
 ```
 
 #### Corridas rápidas
-- `824_all6_erste.r` con parámetros iteración 15 de `823_all6.r`
+- Creo VM 8/256 `all6`
+- Corro `824_all6_erste.r` con parámetros iteración 15 de `823_all6.r`
 Número de iteraciones ultra corto
 ```
   PARAM$experimento <- "exp_all6_erste_824"
-  PARAM$finalmodel$optim$learning_rate <- 0.0910927315056324
-  PARAM$finalmodel$optim$feature_fraction <- 0.0622287783166394
-  PARAM$finalmodel$optim$num_leaves <- 326
-  PARAM$finalmodel$optim$min_data_in_leaf <- 1221
-  envios_opt <- 12169
-  PARAM$finalmodel$optim$num_iterations <- 13 #ick!
+  PARAM$finalmodel$optim$learning_rate <- 0.06789562889433	
+  PARAM$finalmodel$optim$feature_fraction <- 0.0672146950458409
+  PARAM$finalmodel$optim$num_leaves <- 334
+  PARAM$finalmodel$optim$min_data_in_leaf <- 1711
+  envios_opt <- 12146
+  PARAM$finalmodel$optim$num_iterations <- 15 #ick!
 ```
-- Creo VM 8/64 `all6`
-- 
 
+- Corro `824_feh1_eins.r` con parámetros iteración 15 de `823_all6_a.r`
+  - quito semillas BO
+  - parámetros de iteración 26
+```
+  # hiperparametros según corrida de 823_all_a.r
+  PARAM$finalmodel$optim$learning_rate <- 0.0788030608086094
+  PARAM$finalmodel$optim$feature_fraction <- 0.0461101159560178
+  PARAM$finalmodel$optim$num_leaves <- 234
+  PARAM$finalmodel$optim$min_data_in_leaf <- 1547
+  envios_opt <- 12229
+  PARAM$finalmodel$optim$num_iterations <- 15 #ick!
+```
 
 ### Actualización presentación
 Escribo sobre #5 FE histórico tanto en 
