@@ -100,7 +100,7 @@ dtrain <- lgb.Dataset(
 for (i in 1:length(semillerio)) {
   PARAM$finalmodel$semilla <- semillerio[i]
   
-  # hiperparametros según corrida de 823_all_a.r
+  # hiperparametros según corrida de 823_all_a.r iteración 26
   PARAM$finalmodel$optim$learning_rate <- 0.0788030608086094
   PARAM$finalmodel$optim$feature_fraction <- 0.0461101159560178
   PARAM$finalmodel$optim$num_leaves <- 234

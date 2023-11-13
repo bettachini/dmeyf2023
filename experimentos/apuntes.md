@@ -1,6 +1,14 @@
 
 ##  2023-11-13
 
+### Numéro atributos
+- crudo 154 -2 (número_cliente, foto_mes) = 152
+- baseline (lag1,3,6) = (152 -5 +5) *3 = 456 (drop = -5, indicadores = +5, lags = *3)
+- FEH1 152*(6+ 3) = 912 (lags = *6, mín, máx, avg = +3)
+- FEH2 152*(6+ 3 + 7) = 2128  (normalización + deltas norm = +7) 
+
+
+
 ### Ganancia vs semilla: inicio corrida lightgbm
 Sin haber terminado la ejecución de la optimización bayesiana `823_all6.r` y `823_all6_a.r` (ver más abajo), copio en directorio local sus parciales
 ```
@@ -73,11 +81,12 @@ A Dynamic Classification Approach to Churn Prediction in Banking Industry (https
 ##  2023-11-12
 
 ### Optimización bayesiana: inicio de corrida
-- `823_baseline.r` baseline (terminada fecha anterior)
+- `823_baseline.r` baseline (terminada fecha anterior) -> `buckets/b1/exp823_a`
 
 Usando los mismos rangos para los parámetros que para el baseline (puedo haber subestimado la complejidad, estaría bueno contabilizar el número de atributos generados en los casos)
-- `823_all6.r` variante 1 sin normalización
-- `823_all6_a.r` con normalización
+- `823_all6.r` variante 1 sin normalización -> `buckets/b1/exp/823_all6_a`
+- `823_all6_a.r` con normalización -> `buckets/b1/exp/exp_823_all6`
+
 
 
 ### feature engineering
