@@ -101,12 +101,12 @@ for (i in 1:length(semillerio)) {
   PARAM$finalmodel$semilla <- semillerio[i]
   
   # hiperparametros según corrida de 823_baseline.r
-  PARAM$finalmodel$optim$learning_rate <- 0.0910927315056324
-  PARAM$finalmodel$optim$feature_fraction <- 0.0622287783166394
-  PARAM$finalmodel$optim$num_leaves <- 326
-  PARAM$finalmodel$optim$min_data_in_leaf <- 1221
-  envios_opt <- 12169
-  PARAM$finalmodel$optim$num_iterations <- 13 #ick!
+  PARAM$finalmodel$optim$learning_rate <- 0.06789562889433
+  PARAM$finalmodel$optim$feature_fraction <- 0.0672146950458409
+  PARAM$finalmodel$optim$num_leaves <- 3334
+  PARAM$finalmodel$optim$min_data_in_leaf <- 1711
+  envios_opt <- 12146
+  PARAM$finalmodel$optim$num_iterations <- 15 #ick!
   
   # Hiperparametros FIJOS de  lightgbm
   PARAM$finalmodel$lgb_basicos <- list(
