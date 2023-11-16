@@ -1,5 +1,24 @@
 # Journal
 
+## 2023-11-16
+`dritte/823_1217.r`
+
+
+
+`dritte/824_1217.r`
+No necesita cambiar el dataset pues lo generado para el experimento debe funcionar.
+
+Cambié
+- mes objetivo de 202107 a 202109
+
+Hay que cambiar
+- rango de meses de entrenamiento
+  - agregué 202107 y 202108 
+- bagging
+- promediado de probabilidades por semilerio
+
+
+
 ## Error número de predicciones para enviar a Kaggle
 Al intentar hacer un envío a Kaggle me da el error de que está incorrecto el número de predicciones.
 
