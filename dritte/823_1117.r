@@ -35,7 +35,7 @@ options(error = function() {
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
 
-PARAM$experimento <- "exp823_all6"
+PARAM$experimento <- "exp823_all6_1117"
 
 PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 
@@ -43,7 +43,15 @@ PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 #  mucha magia emerger de esta eleccion
 PARAM$input$testing <- c(202108)
 PARAM$input$validation <- c(202107)
-PARAM$input$training <- c(2020111, 202012, 202101, 202102, 202103, 202104, 202105, 202106)
+PARAM$input$training <- c(
+  201901, 201902, 201903, 201904, 201905, 201906,
+  201907, 201908, 201909, 201910, 201911, 201912,
+  202001, 202002, 
+  #202003, 202004, 202005, 202006,
+  #202007, 202008, 202009, 202010, 202011,
+  202012,
+  202101, 202102, 202103, 202104, 202105, 202106
+) # Pandemical madness!
 
 # un undersampling de 0.1  toma solo el 10% de los CONTINUA
 PARAM$trainingstrategy$undersampling <- 1.0 # sin undersampling
@@ -93,10 +101,10 @@ PARAM$lgb_basicos <- list(
 # Aqui se cargan los hiperparametros que se optimizan
 #  en la Bayesian Optimization
 PARAM$bo_lgb <- makeParamSet(
-  makeNumericParam("learning_rate", lower = 0.06, upper = 0.1),
-  makeNumericParam("feature_fraction", lower = 0.03, upper = 0.07),
-  makeIntegerParam("num_leaves", lower = 200L, upper = 350L),
-  makeIntegerParam("min_data_in_leaf", lower = 1200L, upper = 1800L)
+  makeNumericParam("learning_rate", lower = 0.02, upper = 0.35),
+  makeNumericParam("feature_fraction", lower = 0.01, upper = 1.0),
+  makeIntegerParam("num_leaves", lower = 8L, upper = 2048L),
+  makeIntegerParam("min_data_in_leaf", lower = 128L, upper = 4096L)
 )
 
 # si usted es ambicioso, y tiene paciencia, podria subir este valor a 100
