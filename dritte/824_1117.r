@@ -14,7 +14,7 @@ require("lightgbm")
 # defino los parametros de la corrida, en una lista, la variable global  PARAM
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
-PARAM$experimento <- "dritte_824_1216"
+PARAM$experimento <- "dritte824_1217"
 
 PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 
