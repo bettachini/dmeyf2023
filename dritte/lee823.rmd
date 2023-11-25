@@ -1,0 +1,21 @@
+```{r data.table}
+library(data.table)
+```
+
+```{r directorios}
+sendero_base <- '/home/vbettachini/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/buckets/b1/exp/'
+experimento <- 'dritte823_1123'
+sendero <- paste0(sendero_base, experimento, '/') 
+```
+
+```{r lectura}
+resultados_dt <- fread(paste0(sendero, 'exp_dritte823_1123_BO_log.txt'))
+```
+
+```{r resumen}
+# resuldados_dt donde ganancia sea maxima
+máxima <- resultados_dt[which.max(ganancia),]
+máxima
+```
+
+
