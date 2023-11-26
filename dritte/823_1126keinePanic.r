@@ -35,7 +35,7 @@ options(error = function() {
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
 
-PARAM$experimento <- "dritte823_1126nonPandemic"
+PARAM$experimento <- "dritte823_1126keinePanic"
 
 PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 
@@ -115,10 +115,10 @@ PARAM$lgb_basicos <- list(
 # Aqui se cargan los hiperparametros que se optimizan
 #  en la Bayesian Optimization
 PARAM$bo_lgb <- makeParamSet(
-  makeNumericParam("learning_rate", lower = 0.005, upper = 0.02),
-  makeNumericParam("feature_fraction", lower = 0.15, upper = 0.85),
-  makeIntegerParam("num_leaves", lower = 2048L, upper = 8192L),
-  makeIntegerParam("min_data_in_leaf", lower = 2048L, upper = 8192L)
+  makeNumericParam("learning_rate", lower = 0.01, upper = 0.02),
+  makeNumericParam("feature_fraction", lower = 0.01, upper = 1),
+  makeIntegerParam("num_leaves", lower = 1024L, upper = 4096L),
+  makeIntegerParam("min_data_in_leaf", lower = 1024L, upper = 4096L)
 )
 
 # si usted es ambicioso, y tiene paciencia, podria subir este valor a 100
