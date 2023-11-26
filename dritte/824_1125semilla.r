@@ -197,11 +197,11 @@ for (i in 1:length(semillerio)) {
   for (envios in cortes) {
     tb_entrega[, Predicted := 0L]
     tb_entrega[1:envios, Predicted := 1L]
-#    fwrite(
-#      tb_entrega[, list(numero_de_cliente, Predicted)],
-#      file = paste0(PARAM$experimento, "_", i, "_", envios , ".csv"),
-#      sep = ","
-#    )
+    fwrite(
+      tb_entrega[, list(numero_de_cliente, Predicted)],
+      file = paste0(PARAM$experimento, "_", i, "_", envios , ".csv"),
+      sep = ","
+    )
     tb_ganancias <- tb_entrega[truth, on = c("numero_de_cliente"), nomatch = 0]
     tb_ganancias <- tb_ganancias[Predicted == 1,]
     tb_ganancias[,gan := fifelse(clase_ternaria == "BAJA+2", 273000, -7000)]

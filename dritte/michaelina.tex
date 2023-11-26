@@ -72,7 +72,7 @@
 	\begin{itemize}
 		\item learning\_rate: pegado al límite inferior 0.02  \(\rightarrow\) explorar menores
 		\item num\_leaves: pegado a superior 2048 \(\rightarrow\) explorar mayores
-		\item min_data_in_leaf: 3499 
+		\item min\_data\_in\_leaf: 3499 
 	\end{itemize}
 \end{frame}
 
@@ -83,7 +83,13 @@
 	\begin{itemize}
 		\item meses entrenamiento: ídem 823\_1123
 	\end{itemize}
-	No genera archivos de envios
+	No genera archivos de envios:
+	\begin{verbatim}
+		PARAM$finalmodel$optim$learning_rate <- 0.02
+		PARAM$finalmodel$optim$feature_fraction <- 0.730751490284751	
+		PARAM$finalmodel$optim$num_leaves <- 2048
+		PARAM$finalmodel$optim$min_data_in_leaf <- 3500
+	\end{verbatim}
 \end{frame}
 
 
