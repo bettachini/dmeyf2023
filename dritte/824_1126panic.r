@@ -19,13 +19,11 @@ PARAM$experimento <- "dritte824_1226panic"
 PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 
 # meses donde se entrena el modelo
-PARAM$input$training <- c(
-  202101, 202102, 202103, 202104, 202105, 202106,
-  202107, 202108
-)
+PARAM$input$training <- c(202103, 202104, 202105, 202106, 202107, 202108)
+# PARAM$input$training <- c(202101, 202102, 202103, 202104, 202105, 202106, 202107, 202108)
 PARAM$input$future <- c(202109) # meses donde se aplica el modelo
 
-## semillas: 5 declaradas -2 BO + 15 adicionales
+## semillas: 5 declaradas + 15 adicionales - 2 BO
 # PARAM$finalmodel$semilla <- 674831
 semillerio <- c(
   874807, 674831, 974821,
@@ -107,6 +105,7 @@ for (i in 1:length(semillerio)) {
   PARAM$finalmodel$optim$feature_fraction <- 0.730751490284751	
   PARAM$finalmodel$optim$num_leaves <- 2048
   PARAM$finalmodel$optim$min_data_in_leaf <- 3500
+  envios_opt <- 14148
   PARAM$finalmodel$optim$num_iterations <- 100 #ick!
   
   # Hiperparametros FIJOS de  lightgbm
@@ -191,9 +190,15 @@ for (i in 1:length(semillerio)) {
   # espera a la siguiente clase sincronica en donde el tema sera explicado
 
   cortes <- c(envios_opt, seq(8000, 15000, by = 500) )
+  # cortes <- seq(8000, 15000, by = 500)
   for (envios in cortes) {
     tb_entrega[, Predicted := 0L]
     tb_entrega[1:envios, Predicted := 1L]
+    fwrite(
+      tb_entrega[, list(numero_de_cliente, Predicted)],
+      file = paste0(PARAM$experimento, "_", i, "_", envios , ".csv"),
+      sep = ","
+    )
     tb_ganancias <- tb_entrega[truth, on = c("numero_de_cliente"), nomatch = 0]
     tb_ganancias <- tb_ganancias[Predicted == 1,]
     tb_ganancias[,gan := fifelse(clase_ternaria == "BAJA+2", 273000, -7000)]
