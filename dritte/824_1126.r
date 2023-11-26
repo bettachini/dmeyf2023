@@ -14,7 +14,7 @@ require("lightgbm")
 # defino los parametros de la corrida, en una lista, la variable global  PARAM
 #  muy pronto esto se leera desde un archivo formato .yaml
 PARAM <- list()
-PARAM$experimento <- "dritte824_1225"
+PARAM$experimento <- "dritte824_1226"
 
 PARAM$input$dataset <- "./datasets/competencia_03_all6.csv.gz"
 
@@ -24,7 +24,8 @@ PARAM$input$training <- c(
   201907, 201908, 201909, 201910, 201911, 201912,
   202001, 202002, 
   202012,
-  202101, 202102, 202103, 202104
+  202101, 202102, 202103, 202104, 202105, 202106,
+  202107, 202108
 )
 PARAM$input$future <- c(202109) # meses donde se aplica el modelo
 
@@ -222,5 +223,4 @@ write.csv(ganancias,
   file = paste0(PARAM$experimento, "_semillerioGanancias.csv"),
   sep = ","
 )
-cat("\n\nPrediccione para semillas generadas\n")
-# cat("\n\nLa generacion de los archivos para Kaggle ha terminado\n")
+cat("\n\nLa generacion de los archivos para Kaggle ha terminado\n")
