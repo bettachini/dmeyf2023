@@ -157,16 +157,6 @@ for (i in 1:length(semillerio)) {
   )
 
   #--------------------------------------
-  # ahora imprimo la importancia de variables
-  tb_importancia <- as.data.table(lgb.importance(modelo) )
-  archivo_importancia <- paste0("impo_", i, ".txt")
-
-  fwrite(tb_importancia,
-    file = archivo_importancia,
-    sep = "\t"
-  )
-  
-  #--------------------------------------
   # aplico el modelo a los datos sin clase
   dapply <- dataset[foto_mes == PARAM$input$future]
   
@@ -185,44 +175,5 @@ for (i in 1:length(semillerio)) {
     file = paste0("prediccion_", i, ".txt"),
     sep = "\t"
   )
-  
-  # ordeno por probabilidad descendente
-  setorder(tb_entrega, -prob)
-  
-  # genero archivos con los  "envios" mejores
-  # deben subirse "inteligentemente" a Kaggle para no malgastar submits
-  # si la palabra inteligentemente no le significa nada aun
-  # suba TODOS los archivos a Kaggle
-  # espera a la siguiente clase sincronica en donde el tema sera explicado
-
-  cortes <- c(envios_opt, seq(8000, 15000, by = 500) )
-  # cortes <- seq(8000, 15000, by = 500)
-  for (envios in cortes) {
-    tb_entrega[, Predicted := 0L]
-    tb_entrega[1:envios, Predicted := 1L]
-    fwrite(
-      tb_entrega[, list(numero_de_cliente, Predicted)],
-      file = paste0(PARAM$experimento, "_", i, "_", envios , ".csv"),
-      sep = ","
-    )
-    tb_ganancias <- tb_entrega[truth, on = c("numero_de_cliente"), nomatch = 0]
-    tb_ganancias <- tb_ganancias[Predicted == 1,]
-    tb_ganancias[,gan := fifelse(clase_ternaria == "BAJA+2", 273000, -7000)]
-    ganancia <- tibble::tribble(
-      ~semilla,
-      ~ganancia,
-      ~envios,
-      semillerio[i],
-      sum(tb_ganancias$gan),
-      envios
-    )
-    ganancias <- rbind(ganancias, ganancia)  
-  }
   print(paste0("semilla: ",i, " analizada"))
 }
-
-write.csv(ganancias,
-  file = paste0(PARAM$experimento, "_semillerioGanancias.csv"),
-  sep = ","
-)
-cat("\n\nLa generacion de los archivos para Kaggle ha terminado\n")
