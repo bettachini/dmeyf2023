@@ -107,11 +107,11 @@ dtrain <- lgb.Dataset(
 for (i in 1:length(semillerio)) {
   PARAM$finalmodel$semilla <- semillerio[i]
   
-  PARAM$finalmodel$optim$learning_rate <- 0.0172232941321272
-  PARAM$finalmodel$optim$feature_fraction <- 0.41491090283409	
-  PARAM$finalmodel$optim$num_leaves <- 1489
-  PARAM$finalmodel$optim$min_data_in_leaf <- 3226
-  envios_opt <- 12662
+  PARAM$finalmodel$optim$learning_rate <- 0.015222056239762
+  PARAM$finalmodel$optim$feature_fraction <- 0.470908275126196	
+  PARAM$finalmodel$optim$num_leaves <- 1804
+  PARAM$finalmodel$optim$min_data_in_leaf <- 2687
+  envios_opt <- 12543
   PARAM$finalmodel$optim$num_iterations <- 100 #ick!
   
   # Hiperparametros FIJOS de  lightgbm
