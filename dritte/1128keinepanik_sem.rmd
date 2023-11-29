@@ -1,0 +1,122 @@
+En las corridas de `z824` se generan las probabilidades para cada cliente en cada foto_mes.  
+Se hace esto para cada semilla. Todo lo que hay que hacer es obtener el promedio y luego con esto reproducir el proceso en `z824`.   
+Así que me doy cuenta que lo mejor será hacer esto en R...
+
+
+### Descargo resultados de corrida de `824_1126panic.r`
+Genero el comando seleccionadndo los arhcivos de raiz `prediccion` en [bucket dritte824_1126panic](https://console.cloud.google.com/storage/browser/normanbuck/exp/dritte814_1226panic;tab=objects?project=dmeyf2023&prefix=&forceOnObjectsSortingFiltering=false)
+
+
+```{bash}
+gsutil -m cp \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_1.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_10.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_11.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_12.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_13.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_14.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_15.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_16.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_17.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_18.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_2.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_3.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_4.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_5.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_6.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_7.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_8.txt" \
+  "gs://normanbuck/exp/dritte824_1128kp/prediccion_9.txt" \
+  .
+```
+
+
+Busco promediar la columna prob de los archivos predicción_#.txt que se encuentran en el directorio `
+
+```{r directorios}
+sendero_base <- '/home/vbettachini/documents/universitet/FCEyN/maestríaDatos/economíaFinanzas/buckets/b1/exp/'
+experimento <- 'dritte824_1128kp'
+sendero <- paste0(sendero_base, experimento, '/') 
+```
+
+```{r biblioteca data.table}
+library(data.table)
+```
+
+```{r carga archivos predicciones}
+files <- list.files(path = sendero, pattern = "prediccion_\\d+.txt")
+predicciones_dt <- lapply(paste0(sendero, files), function(file) fread(file))
+```
+
+```{r}
+predicciones_dt[1]
+```
+
+```{r data.table salida}
+# create data.table with numero_de_cliente and foto_mes of predicciones_dt[[1]]
+promedio_dt <- predicciones_dt[[1]][, .(numero_de_cliente, foto_mes)]
+```
+
+```{r}
+# mean of prob column of each file for each numero_de_cliente and foto_mes
+for (i in 1:length(predicciones_dt)) {
+  promedio_dt[, paste0('prob', i) := predicciones_dt[[i]][, prob]]
+}
+# append column prob with mean of prob# columns
+promedio_dt[, prob := rowMeans(.SD), .SDcols = paste0('prob', 1:length(predicciones_dt))]
+# remove prob# columns
+promedio_dt[, paste0('prob', 1:length(predicciones_dt)) := NULL]
+```
+
+
+Tomado de 824
+```{r salida promedio}
+tb_entrega <- promedio_dt
+PARAM <- list(
+  experimento = "dritte824_1128_keinePanikSeeds",
+  semillas = 1:18
+  #envios_opt = 10000
+)
+setwd(sendero)
+
+## Tomado de 824
+# ordeno por probabilidad descendente
+setorder(tb_entrega, -prob)
+
+# genero archivos con los  "envios" mejores
+# deben subirse "inteligentemente" a Kaggle para no malgastar submits
+# si la palabra inteligentemente no le significa nada aun
+# suba TODOS los archivos a Kaggle
+# espera a la siguiente clase sincronica en donde el tema sera explicado
+
+# cortes <- c(envios_opt, seq(8000, 15000, by = 500) )
+cortes <- seq(8000, 15000, by = 500)
+for (envios in cortes) {
+  tb_entrega[, Predicted := 0L]
+  tb_entrega[1:envios, Predicted := 1L]
+  fwrite(
+    tb_entrega[, list(numero_de_cliente, Predicted)],
+    file = paste0(PARAM$experimento, "_", envios , ".csv"),
+    # file = paste0(PARAM$experimento, "_", i, "_", envios , ".csv"),
+    sep = ","
+  )
+#  tb_ganancias <- tb_entrega[truth, on = c("numero_de_cliente"), nomatch = 0]
+#  tb_ganancias <- tb_ganancias[Predicted == 1,]
+#  tb_ganancias[,gan := fifelse(clase_ternaria == "BAJA+2", 273000, -7000)]
+#  ganancia <- tibble::tribble(
+#    ~semilla,
+#    ~ganancia,
+#    ~envios,
+#    semillerio[i],
+#    sum(tb_ganancias$gan),
+#    envios
+#  )
+#  ganancias <- rbind(ganancias, ganancia)  
+}
+
+#write.csv(ganancias,
+#  file = paste0(PARAM$experimento, "_semillerioGanancias.csv"),
+#  sep = ","
+#)
+cat("\n\nLa generacion de los archivos para Kaggle ha terminado\n")
+```
