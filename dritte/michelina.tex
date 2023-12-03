@@ -1,0 +1,182 @@
+\documentclass[aspectratio=169]{beamer} % proyector 16:9 | Ref:  https://en.wikibooks.org/wiki/LaTeX/Presentations
+\usetheme{Antibes}
+\beamertemplatenavigationsymbolsempty %% Sin barra navegación
+\usecolortheme{beaver}
+
+
+%% Spanska!
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern} % no producia letras en matemático | Ref: https://tex.stackexchange.com/questions/250413/error-when-using-greek-symbol-in-subscript-in-beamer-presentation 
+\usepackage[spanish]{babel}
+\def\spanishoptions{argentina}
+
+%% inclusión de gráficas
+\usepackage{graphicx}	% instalar ghostscript-x para que el dvi muestre los eps
+\graphicspath{ {./graphs/} {../figuras/} }
+\usepackage{rotating}	% epígrafe rotado
+
+\begin{document}
+
+\section{Modelo}
+
+\begin{frame}
+  \frametitle{Modelo de attition para la campaña de retención proactiva de clientes}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \begin{block}{Objetivo}
+        \begin{itemize}
+          \item Bajas del \emph{Paquete Premium}, 154 k clientes
+          \item Predición dos meses previos (BAJA+2)
+		    \end{itemize}
+      \end{block}
+ 
+      \begin{block}{Estimación del modelo finalizado}
+        \begin{itemize}
+          \item \# Envíos de ofertas de retención = 9.5k 
+			    \item Ganancia = 125.4 M AR\$
+		    \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+
+\begin{frame}
+  \frametitle{Algoritmo}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \begin{block}{}
+        \begin{itemize}
+			    \item LightGBM {\tiny (lightgbm\_3.3.5) }% en lenguaje R(R6\_2.5.1)
+			    \item Entrenamiento y ensayo contra foto 202107\\
+			    $\rightarrow$ reutilización código z824 
+			    \item Optimización Bayesiana de hiperparámetros\\
+			    $\rightarrow$ z823 
+		    \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\section{Experimentos}
+
+\begin{frame}
+  \frametitle{Insumo}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \begin{block}{Datos crudos}
+       \begin{itemize}
+			    \item 152 atributos de 154k clientes
+          \item fotos 201901 a 202109% =  $\approx$ 5M registros
+		    \end{itemize}
+      \end{block}
+
+      \begin{block}{Baseline $\Rightarrow$ 456 atributos}
+        \begin{itemize}
+          \item lag 1, 3 y 6 meses 
+          \item Extensión JupySQL operando sobre\\base SQL DuckDB {\tiny (duckdb\_0.2.6)}
+		    \end{itemize}
+        {\tiny sql\_eng\_baseline.ipynb}
+      \end{block}
+
+   \end{column}
+  \end{columns}
+\end{frame}
+
+
+\subsection{Feature engineering histórico}
+
+\begin{frame}
+  \frametitle{}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+     \begin{block}{FEH 1 = baseline + $\Rightarrow$ 912 atributos}
+        \begin{itemize}
+          \item lags 2, 4 y 5 meses $\rightarrow$ semestre
+          \item min, máx, media movil semestre
+          \item drop reiterados
+          \item atm\_oth $>$ atm\_oth
+          \item tarjeta = visa + mc (m/c)
+          \item proxy actividad = sum[abs(m*)]
+		    \end{itemize}
+        {\tiny sql\_eng\_all6cat.ipynb}
+      \end{block}
+     
+      \begin{block}{FEH 2 = FEH 1 + $\Rightarrow$ 2128 atributos}
+        \begin{itemize}
+          \item normalización semestral: atr / media semestral
+          \item $\Delta$ normalizado (atr - lag\#)/ media semestral
+		    \end{itemize}
+        {\tiny sql\_eng\_all6.ipynb}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Rendimientos FEH 1 y FEH 2}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \begin{block}{Ganancia vs \# Envíos}
+        \includegraphics[width = \columnwidth]{gananciaVsEnvíos.png}
+      \end{block}
+    \end{column}
+  \end{columns}      
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Distribución de ganancias}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \begin{block}{Envíos con máxima ganancia en FEH2}
+        \includegraphics[width = \columnwidth]{distribuciónGanancia.png}
+      \end{block}
+    \end{column}
+  \end{columns}      
+\end{frame}
+
+
+
+\subsection{Imputación de datos}
+
+\begin{frame}
+  \frametitle{Catástrofes}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+      \begin{block}{Análisis de catástrofes}
+        \begin{itemize}
+          \item Atributos montos (m*) [flotantes]
+          \item o cantidad (c*) [enteros]
+          \item \textgreater 10 k registros == 0.0 / 0 en foto
+          \item $\Rightarrow$ NULL todos los registros en foto
+        \end{itemize}
+        {\tiny sql\_eng\_all6cat.ipynb}
+      \end{block}
+    \end{column}
+  \end{columns}      
+\end{frame}
+
+
+
+\subsection{Semillerío}
+
+\begin{frame}
+  \frametitle{sale}
+  \begin{columns}[onlytextwidth]
+    \begin{column}{.6\textwidth}
+        {\tiny dritte824\_1129.r}\\
+        {\tiny 1129\_null\_sem.r}
+    \end{column}
+  \end{columns}      
+\end{frame}
+
+
+
+
+
+
+\end{document}

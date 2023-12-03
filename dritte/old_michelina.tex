@@ -1,0 +1,143 @@
+\documentclass[aspectratio=43]{beamer}
+% \documentclass[aspectratio=169]{beamer} % proyector 16:9 | Ref:  https://en.wikibooks.org/wiki/LaTeX/Presentations
+\usetheme{Boadilla}
+\beamertemplatenavigationsymbolsempty %% Sin barra navegación
+\usecolortheme{beaver}
+
+
+%% Spanska!
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern} % no producia letras en matemático | Ref: https://tex.stackexchange.com/questions/250413/error-when-using-greek-symbol-in-subscript-in-beamer-presentation 
+\usepackage[spanish]{babel}
+\def\spanishoptions{argentina}
+
+%% inclusión de gráficas
+\usepackage{graphicx}	% instalar ghostscript-x para que el dvi muestre los eps
+\graphicspath{ {./graphs/} {../figuras/} }
+\usepackage{rotating}	% epígrafe rotado
+
+
+\begin{document}
+
+\title{Predicción BAJA+2 paquete Premium}
+\author[bettachini@gmail.com]{Bettachini, Víctor A.}
+%\institute[]{
+%	Ingeniería Mecánica, DIIT, UNLaM
+%}
+\date[2023-09-22]{
+	V Encuentro \emph{Mejora de las Estrategias Pedagógicas}%\\22 de septiembre de 2023
+}
+
+\usebackgroundtemplate{
+  \includegraphics[width=\paperwidth, height=\paperheight]{diit_titre_background}
+}	% unset background % https://tex.stackexchange.com/questions/201013/how-to-include-a-background-image-to-only-one-page-of-a-beamer-presentation
+
+\begin{frame} 
+  \titlepage
+\end{frame}
+
+\usebackgroundtemplate{
+  \includegraphics[width=\paperwidth, height=\paperheight]{diit_background}
+} %% https://mprnotes.wordpress.com/2009/08/14/changing-background-image-of-latex-beamer/
+
+\begin{frame}
+	\frametitle{Contenido}
+	\tableofcontents
+\end{frame}
+
+\section{Objetivo}
+
+\begin{frame}
+	\frametitle{Resumen}
+	\begin{block}{Objetivo}
+		Predecir bajas de clientes del Paquete Premium con dos meses de anticipación 
+	\end{block}
+	\begin{block}{Herramientas, datos, métricas}
+		\begin{itemize}
+			\item Algoritmo: LightGBM(lightgbm\_3.3.5) en lenguaje R(R6\_2.5.1)
+			\item Datos: 152 atributos, 154k clientes, fotos 201901 a 202109% =  $\approx$ 5M registros 
+			\item Evaluación: BAJA+2 de la foto de 202109 solo con foto 202107
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+
+\section{Journal}
+
+\begin{frame}
+	\frametitle{Análisis exploratorio del conjunto de datos}
+Cosas
+dataset crudo
+Anotar limpieza con NULL
+Coalescencia de atributos
+Creación de nuevos atributos
+Data engineering histórico
+lags
+deltas
+medias móviles
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Análisis exploratorio del conjunto de datos}
+	Del análisis exploratorio:
+	\begin{itemize}
+		\item 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Feature engineering: nuevas variables}
+	
+
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Feature engineering: históricos}
+	
+
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{2023-11-23 OB 823\_1123}
+	Parámetros
+	\begin{itemize}
+		\item sin undersampling
+		\item semilla\_azar: primera 777787
+		\item lgb\_semilla: segunda 274837
+		\item testing 20216
+		\item valdation 20215
+		\item meses entrenamiento: 201901 a 202104 excepto ``confinamiento'': 202003 a 202011 inclusive
+	\end{itemize}
+	Resultados iteración 26
+	\begin{itemize}
+		\item learning\_rate: pegado al límite inferior 0.02  \(\rightarrow\) explorar menores
+		\item num\_leaves: pegado a superior 2048 \(\rightarrow\) explorar mayores
+		\item min\_data\_in\_leaf: 3499 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{824\_1125semilla}
+	Parámetros
+	\begin{itemize}
+		\item meses entrenamiento: ídem 823\_1123
+	\end{itemize}
+	No genera archivos de envios:
+%	\verb{PARAM$finalmodel$optim$learning_rate <- 0.02}
+%	\verb'PARAM$finalmodel$optim$feature_fraction <- 0.730751490284751'	
+%	\verb'PARAM$finalmodel$optim$num_leaves <- 2048'
+%	\verb'PARAM$finalmodel$optim$min_data_in_leaf <- 3500'
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{?}
+\end{frame}
+
+
+\end{document}
