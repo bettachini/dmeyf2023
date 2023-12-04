@@ -35,8 +35,8 @@
       \begin{block}{Resultados}
         \begin{itemize}
 			    \item Ganancia = 125.4 M AR\$
+			    \item Predicción para 202109
           \item \# Envíos de ofertas de retención = 9.5k 
-			    \item Predice para 202109
 	    \end{itemize}
       \end{block}
     \end{column}
@@ -91,8 +91,8 @@
        \begin{itemize}
           \item Entrenamiento sobre subset: 202010 a 202103
           \item Ensayo: 202105 / validación: 202104
-          \item Ganancia: 77 M\$\\
-            {\tiny 823\_lightgbm\_binaria\_BO\_20231007.r}
+          \item Ganancia: 75.8 M AR\$\\
+            {\tiny zweite/823\_lightgbm\_binaria\_BO\_20231007.r}
 		    \end{itemize}
       \end{block}
     \end{column}
@@ -107,21 +107,24 @@
 
 
 \begin{frame}
-  \frametitle{Nuevos features}
+  \frametitle{Primeros ensayos de Feature Engineering}
   \begin{columns}[onlytextwidth]
     \begin{column}{.6\textwidth}
-      \begin{block}{}
+      \begin{block}{Nuevos features}
         \begin{itemize}
-          \item Indicadores de saldo negativo\\
-          $\sum m* < 0$
-          \item Atributo de actividad\\
-          proxy = $\sum |m*|$
-          \item ¿Mayor uso ATMs de la competencia?\\
-          atm\_oth $>$ atm\_oth
+          \item Indicadores de saldo negativo $\sum m* < 0$
+          \item Proxy actividad = $\sum |m*|$
+          \item ¿Más ATMs competencia? atm\_oth $>$ atm\_oth
           \item Tarjetas: coalesce montos (m) y transacciones\\
            tarjeta(m/c) = visa(m/c) + mc (m/c)
-       \end{itemize}
+        \end{itemize}
         {\tiny zweite/sql\_eng.ipynb}
+      \end{block}
+      \begin{block}{Evaluación features}
+        \begin{itemize}
+          \item Ganancia = 81.8 M AR\$\\
+          {\tiny zweite/823\_lightgbm\_binaria\_BO\_20231011.r}
+        \end{itemize}
       \end{block}
    \end{column}
   \end{columns}
@@ -244,8 +247,7 @@
       \begin{block}{Múltiples corridas LightGBM}
         \begin{itemize}
           \item Foto objetivo predicción $\rightarrow$ 202109
-          \item 18 semillas para corridas
-          \item Distintas probabilidades por cliente\\
+          \item Distintas probabilidades por cliente: 18 semillas\\
           {\tiny dritte/824\_1129null.r}
           \item Promedio de predicciones\\
           \item Asignación de envíos\\
